@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Cyber Threat Map</title>
+
+    <!-- 핵심 스크립트 -->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+    <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
+
+    <!-- 폰트 추가 - Pretendard -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.6/static/pretendard.css">
+
+    <!-- 핵심 CSS -->
+    <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- 제목 컨테이너 (고정 위치) -->
+        <div class="title-container">
+            <h1 class="title">LIVE CYBER THREAT MAP</h1>
+            <p class="subtitle">151,223 ATTACKS ON THIS DAY</p>
+        </div>
+        
+        <!-- 메인 콘텐츠 래퍼 -->
+        <div class="content-wrapper">
+            <div class="top-container">
+                <!-- 왼쪽 사이드바 -->
+                <div class="sidebar">
+                    <!-- 공격 국가 TOP5 테이블 -->
+                    <div class="sidebar-table-container">
+                        <h3 class="sidebar-table-title">공격 국가 TOP5</h3>
+                        <table class="sidebar-table">
+                            <thead>
+                                <tr>
+                                    <th>국가</th>
+                                    <th>공격추이</th>
+                                    <th>건수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="country-attack-log">
+                                <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 공격 유형 TOP5 테이블 -->
+                    <div class="sidebar-table-container">
+                        <h3 class="sidebar-table-title">공격 유형 TOP5</h3>
+                        <table class="sidebar-table">
+                            <thead>
+                                <tr>
+                                    <th>공격유형</th>
+                                    <th>공격추이</th>
+                                    <th>건수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attack-type-log">
+                                <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 지도 컨테이너 -->
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+            </div>
+            
+            <!-- 하단 영역 (테이블) -->
+            <div class="bottom-container">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>발생시각 </th>
+                                <th>출발지 IP</th>
+                                <th>출발지 국가</th>
+                                <th>출발지 PORT</th>
+                                <th>목적지 IP</th>
+                                <th>목적지 국가</th>
+                                <th>목적지 PORT</th>
+                                <th>공격 유형</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attack-log">
+                            <!-- 테이블 내용은 JavaScript에서 동적으로 추가됨 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 필수 스크립트 -->
+    <script src="/env.js"></script>
+    <script src="/static/map.js"></script>
+    
+    <!-- 테이블 데이터 관리를 위한 스크립트 -->
+    <script>
+        // 공격 로그 데이터를 저장할 배열들
+        let attackLogs = [];
+        let countryAttackStats = {};
+        let attackTypeStats = {};
+        const MAX_LOGS = 100; // 최대 100개까지만 저장
+        
+        // 국가별 통계 업데이트 함수
+        function updateCountryStats(country, countryToCodeMap) {
+            if (!country || country === "파싱 안됨?") return;
+            
+            // 국가 코드 찾기
+            let countryCode = "";
+            if (countryToCodeMap && typeof countryToCodeMap === 'object') {
+                countryCode = countryToCodeMap[country] || "";
+            }
+            
+            if (!countryAttackStats[country]) {
+                countryAttackStats[country] = {
+                    count: 1,
+                    trend: "same", // 기본값
+                    code: countryCode
+                };
+            } else {
+                countryAttackStats[country].count++;
+                countryAttackStats[country].trend = "up"; // 증가 추세로 표시
+                if (countryCode && !countryAttackStats[country].code) {
+                    countryAttackStats[country].code = countryCode;
+                }
+            }
+            
+            // TOP5 테이블 업데이트
+            updateCountryTable();
+        }
+        
+        // 공격 유형별 통계 업데이트 함수
+        function updateAttackTypeStats(attackType) {
+            if (!attackType || attackType === "파싱 안됨?") return;
+            
+            if (!attackTypeStats[attackType]) {
+                attackTypeStats[attackType] = {
+                    count: 1,
+                    trend: "same" // 기본값
+                };
+            } else {
+                attackTypeStats[attackType].count++;
+                attackTypeStats[attackType].trend = "up"; // 증가 추세로 표시
+            }
+            
+            // TOP5 테이블 업데이트
+            updateAttackTypeTable();
+        }
+        
+        // 국가별 TOP5 테이블 업데이트
+        function updateCountryTable() {
+            const tableBody = document.getElementById('country-attack-log');
+            tableBody.innerHTML = ''; // 테이블 초기화
+            
+            // 객체를 배열로 변환하고 건수 기준으로 정렬
+            const sortedCountries = Object.keys(countryAttackStats)
+                .map(country => ({
+                    name: country,
+                    count: countryAttackStats[country].count,
+                    trend: countryAttackStats[country].trend,
+                    code: countryAttackStats[country].code
+                }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5); // TOP5만 선택
+            
+            // 데이터 채우기
+            sortedCountries.forEach(country => {
+                const row = document.createElement('tr');
+                
+                // 트렌드 아이콘 결정
+                let trendIcon = "■";
+                let trendClass = "trend-same";
+                
+                if (country.trend === "up") {
+                    trendIcon = "▲";
+                    trendClass = "trend-up";
+                } else if (country.trend === "down") {
+                    trendIcon = "▼";
+                    trendClass = "trend-down";
+                }
+                
+                // 국기 이미지 태그 생성
+                let flagImg = '';
+                if (country.code) {
+                    flagImg = `<img src="/static/flags/${country.code}.png" alt="${country.name} 국기" class="country-flag">`;
+                }
+                
+                // 각 열에 데이터 추가
+                row.innerHTML = `
+                    <td data-full-text="${country.name}">${flagImg} ${country.name}</td>
+                    <td><span class="${trendClass}">${trendIcon}</span></td>
+                    <td>${country.count.toLocaleString()}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 공격 유형별 TOP5 테이블 업데이트
+        function updateAttackTypeTable() {
+            const tableBody = document.getElementById('attack-type-log');
+            tableBody.innerHTML = ''; // 테이블 초기화
+            
+            // 객체를 배열로 변환하고 건수 기준으로 정렬
+            const sortedTypes = Object.keys(attackTypeStats)
+                .map(type => ({
+                    name: type,
+                    count: attackTypeStats[type].count,
+                    trend: attackTypeStats[type].trend
+                }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5); // TOP5만 선택
+            
+            // 데이터 채우기
+            sortedTypes.forEach(type => {
+                const row = document.createElement('tr');
+                
+                // 트렌드 아이콘 결정
+                let trendIcon = "■";
+                let trendClass = "trend-same";
+                
+                if (type.trend === "up") {
+                    trendIcon = "▲";
+                    trendClass = "trend-up";
+                } else if (type.trend === "down") {
+                    trendIcon = "▼";
+                    trendClass = "trend-down";
+                }
+                
+                // 각 열에 데이터 추가
+                row.innerHTML = `
+                    <td data-full-text="${type.name}">${type.name}</td>
+                    <td><span class="${trendClass}">${trendIcon}</span></td>
+                    <td>${type.count.toLocaleString()}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 테이블 업데이트 함수
+        function updateAttackTable(newAttack) {
+            // 배열 맨 앞에 새 데이터 추가
+            attackLogs.unshift(newAttack);
+            
+            // 최대 개수 제한
+            if (attackLogs.length > MAX_LOGS) {
+                attackLogs = attackLogs.slice(0, MAX_LOGS);
+            }
+            
+            // 테이블 업데이트
+            const tableBody = document.getElementById('attack-log');
+            tableBody.innerHTML = ''; // 테이블 초기화
+            
+            // 데이터 채우기
+            attackLogs.forEach(log => {
+                const row = document.createElement('tr');
+                
+                // 국기 이미지 태그 생성 (출발지)
+                let srcFlagImg = '';
+                if (log.srcCountryCode) {
+                    srcFlagImg = `<img src="/static/flags/${log.srcCountryCode}.png" alt="${log.srcCountry} 국기" class="country-flag">`;
+                }
+                
+                // 국기 이미지 태그 생성 (목적지)
+                let dstFlagImg = '';
+                if (log.dstCountryCode) {
+                    dstFlagImg = `<img src="/static/flags/${log.dstCountryCode}.png" alt="${log.dstCountry} 국기" class="country-flag">`;
+                }
+                
+                // 각 열에 데이터 추가
+                row.innerHTML = `
+                    <td>${log.eventTime}</td>
+                    <td>${log.srcIp}</td>
+                    <td>${srcFlagImg} ${log.srcCountry}</td>
+                    <td>${log.srcPort}</td>
+                    <td>${log.dstIp}</td>
+                    <td>${dstFlagImg} ${log.dstCountry}</td>
+                    <td>${log.dstPort}</td>
+                    <td>${log.attackType}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 웹소켓으로부터 데이터를 받을 때 테이블 업데이트 (기존 웹소켓 코드 확장)
+        const originalOnMessage = webSock.onmessage;
+        webSock.onmessage = function(e) {
+            // 기존 웹소켓 처리 로직 실행
+            if (originalOnMessage) {
+                originalOnMessage(e);
+            }
+            
+            try {
+                const msg = JSON.parse(e.data);
+                if (msg.type === "Traffic") {
+                    // 새 공격 로그 생성
+                    const newAttack = {
+                        eventTime: new Date().toLocaleTimeString(),
+                        srcIp: msg.src_ip || "파싱 안됨?",
+                        srcCountry: msg.country || "파싱 안됨?",
+                        srcCountryCode: msg.country_to_code ? msg.country_to_code[msg.country] || "" : "",
+                        srcPort: msg.src_port || "파싱 안됨?",
+                        dstIp: msg.dst_ip || "파싱 안됨?",
+                        dstCountry: msg.dst_country || "United States",
+                        dstCountryCode: msg.country_to_code ? msg.country_to_code["United States"] || "US" : "US",
+                        dstPort: msg.dst_port || "파싱 안됨?",
+                        attackType: msg.protocol || "파싱 안됨?"
+                    };
+                    
+                    // 메인 테이블 업데이트
+                    updateAttackTable(newAttack);
+                    
+                    // 국가별 통계 업데이트
+                    updateCountryStats(newAttack.srcCountry, msg.country_to_code);
+                    
+                    // 공격 유형별 통계 업데이트
+                    updateAttackTypeStats(newAttack.attackType);
+                }
+            } catch (err) {
+                console.log("Error processing message for table:", err);
+            }
+        };
+        
+        // 초기 더미 데이터로 설정
+        // (실제 데이터가 들어오기 전에 표시할 목적)
+        window.addEventListener('load', function() {
+            /*
+            // 국가별 통계 초기화
+            const initialCountries = [
+                { name: "중국", count: 1245, trend: "up", code: "CN" },
+                { name: "러시아", count: 945, trend: "up", code: "RU" },
+                { name: "미국", count: 742, trend: "down", code: "US" },
+                { name: "브라질", count: 451, trend: "same", code: "BR" },
+                { name: "인도", count: 389, trend: "up", code: "IN" }
+            ];
+            
+            initialCountries.forEach(country => {
+                countryAttackStats[country.name] = {
+                    count: country.count,
+                    trend: country.trend,
+                    code: country.code
+                };
+            });
+            
+            // 공격 유형별 통계 초기화
+            const initialTypes = [
+                { name: "SQL Injection", count: 876, trend: "up" },
+                { name: "DDoS", count: 645, trend: "down" },
+                { name: "XSS", count: 532, trend: "up" },
+                { name: "Brute Force", count: 487, trend: "same" },
+                { name: "Phishing", count: 351, trend: "up" }
+            ];
+            
+            initialTypes.forEach(type => {
+                attackTypeStats[type.name] = {
+                    count: type.count,
+                    trend: type.trend
+                };
+            });
+            */
+            
+            // 초기 테이블 업데이트
+            updateCountryTable();
+            updateAttackTypeTable();
+        });
+    </script>
+</body>
+
+</html>

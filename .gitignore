@@ -1,0 +1,123 @@
+# In the Name of God, the Originator the Creative
+
+############################
+# OS X
+############################
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+.Spotlight-V100
+.Trashes
+._*
+
+
+############################
+# Linux
+############################
+
+*~
+
+
+############################
+# Windows
+############################
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+
+
+############################
+# Packages
+############################
+
+*.7z
+*.csv
+*.dat
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.seed
+*.so
+*.swo
+*.swp
+*.swn
+*.swm
+*.out
+*.pid
+
+
+############################
+# Logs and databases
+############################
+
+.tmp
+*.log
+*.rdb
+*.sql
+*.sqlite
+*.sqlite3
+*.mmdb
+
+############################
+# Misc.
+############################
+
+/myenv
+.env
+*#
+ssl
+.idea
+nbproject
+metatrader
+config.yaml
+*.pyc
+
+############################
+# Node.js
+############################
+
+lib-cov
+lcov.info
+pids
+logs
+results
+node_modules
+.node_history
+
+############################
+# Tests
+############################
+
+testApp
+coverage
+
+############################
+# Build
+############################
+
+main.build
+main.dist
+build
+dist
+main.spec
+
+############################
+# Temp
+############################
