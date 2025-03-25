@@ -8,6 +8,7 @@ AUTHOR: Matthew May - mcmay.web@gmail.com
 import json
 import redis
 import tornadoredis
+import subprocess
 
 # import tornado.httpserver
 import tornado.ioloop
@@ -284,4 +285,5 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("\nSHUTTING DOWN")
+        subprocess.run(["bash", "../stop.sh"])
         exit()

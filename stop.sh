@@ -9,9 +9,9 @@ echo "Stopping Fake Syslog Gen Script..."
 pkill -f random_syslog_gen.py
 
 # Stop the DataServer
-echo "Stopping DataServer..."  
+echo "Stopping Data Server..."  
 pkill -f data_server.py
 
 # Stop redis-server
-echo "Stopping redis-server..."
+echo "Stopping Redis Server..."
 systemctl stop redis.service

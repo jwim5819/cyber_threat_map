@@ -34,7 +34,7 @@ redis_instance = None
 # required input paths
 syslog_path = "/var/log/syslog"
 # syslog_path = '/var/log/reverse-proxy.log'
-db_path = "/home/jwim/map_test/DB/GeoLite2-City.mmdb"
+db_path = "../DB/GeoLite2-City.mmdb"
 
 # file to log data
 # log_file_out = '/var/log/map_data_server.out'
