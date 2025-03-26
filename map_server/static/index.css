@@ -83,7 +83,7 @@ body {
 .top-container {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: 80%;
 }
 
 .bottom-container {
@@ -94,7 +94,7 @@ body {
   margin-top: 20px;
   padding: 15px;
   box-sizing: border-box;
-  height: 220px;
+  height: 20%;
   /* 고정 높이 */
   min-height: 220px;
   /* 최소 높이 보장 */

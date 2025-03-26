@@ -1,6 +1,10 @@
 // 웹소켓 연결
 var webSock = new WebSocket("ws://192.168.10.231:8888/websocket");
 
+
+// 어택 카운트
+let attackCounter = 0;
+
 // 지도 초기화 - 줌 컨트롤 및 드래그 기능 비활성화
 var map = L.map('map', {
   center: [45.0, 12.0],
@@ -178,9 +182,9 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
   var lineGraph = svg
     .append("path")
     .attr("d", lineFunction(lineData))
-    .attr("opacity", 0.7)
+    .attr("opacity", 0.4)
     .attr("stroke", msg.color)
-    .attr("stroke-width", 4)
+    .attr("stroke-width", 5)
     .attr("fill", "none");
 
   // 선 애니메이션
@@ -291,6 +295,9 @@ webSock.onmessage = function (e) {
       handleParticle(msg, srcPoint);
       // countryMarker를 함께 넘김
       handleTraffic(msg, srcPoint, hqPoint, countryMarker);
+      // 어택카운트 갱신
+      attackCounter++;
+      document.querySelector('.subtitle').textContent = `${attackCounter.toLocaleString()} ATTACKS ON THIS DAY`;
     }
   } catch (err) {
     console.log(err);

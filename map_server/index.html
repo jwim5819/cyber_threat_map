@@ -55,7 +55,7 @@
       <!-- 제목 컨테이너 (고정 위치) -->
       <div class="title-container">
         <h1 class="title">LIVE CYBER THREAT MAP</h1>
-        <p class="subtitle">???,??? ATTACKS ON THIS DAY</p>
+        <p class="subtitle">ATTACKS ON THIS DAY</p>
       </div>
 
       <!-- 메인 콘텐츠 래퍼 -->
@@ -156,6 +156,7 @@
         // CSS 변수로 스케일 비율 설정
         document.documentElement.style.setProperty("--scale-ratio", scaleRatio);
       }
+      resizeConainer()
       
 
       // 토글 버튼 클릭 이벤트
@@ -165,9 +166,12 @@
         resizeConainer();
       });
       */
-
+      
+      // 창크기변화 감지
       window.addEventListener('resize', resizeConainer);
+      // 전체화면 감지
       window.addEventListener('fullscreenchange', resizeConainer);
+      // 새로고침 감지
 
 
       // 공격 로그 데이터를 저장할 배열들
