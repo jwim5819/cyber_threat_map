@@ -5,9 +5,9 @@ var webSock = new WebSocket("ws://192.168.10.231:8888/websocket");
 var map = L.map('map', {
   center: [45.0, 12.0],
   zoom: 2,
-  minZoom: 1,
+  minZoom: 2,
   maxZoom: 3,
-  zoomControl: true,
+  zoomControl: false,
   dragging: true,
   doubleClickZoom: true,
   scrollWheelZoom: true,
