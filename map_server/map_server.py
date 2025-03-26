@@ -6,6 +6,7 @@ import subprocess
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
+import tornado.autoreload
 
 from dotenv import load_dotenv
 import os
@@ -40,7 +41,9 @@ load_dotenv()
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(request):
-        request.render("index.html")
+        request.render("index.html",
+                       HOST=os.getenv("WEB_SERVER_HOST"),
+                       PORT=os.getenv("DOCKER_PORT"))
 
 
 class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
@@ -57,7 +60,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
 
         try:
             # This is the IP address of the DataServer
-            self.client = tornadoredis.Client(os.getenv("HOST"))
+            self.client = tornadoredis.Client(os.getenv("REDIS_HOST"))
             self.client.connect()
             print("[*] Connected to Redis server")
             yield tornado.gen.Task(self.client.subscribe, "attack-map-production")
@@ -247,6 +250,7 @@ class EnvHandler(tornado.web.RequestHandler):
             "MAPBOX_TOKEN": os.getenv("MAPBOX_TOKEN"),
             "HD_LAT": os.getenv("HD_LAT"),
             "HD_LNG": os.getenv("HD_LNG"),
+            
         }
         self.set_header("Content-Type", "application/javascript")
         self.write(f"window._env_ = {json.dumps(env)}")
@@ -273,16 +277,21 @@ def main():
     # Create and start app listening on port 8888
     try:
         app = tornado.web.Application(handlers, **settings)
-        app.listen(os.getenv("PORT"))
+        app.listen(os.getenv("WEB_SERVER_PORT"))
         print("[*] Waiting on browser connections...")
+        tornado.autoreload.start()
+        tornado.autoreload.watch('static/map.js')
+        tornado.autoreload.watch('static/index.css')
+        tornado.autoreload.watch('index.html')
         tornado.ioloop.IOLoop.instance().start()
+        
     except Exception as appFail:
         print(appFail)
 
 
 if __name__ == "__main__":
     try:
-        main()
+        main() 
     except KeyboardInterrupt:
         print("\nSHUTTING DOWN")
         subprocess.run(["bash", "../stop.sh"])

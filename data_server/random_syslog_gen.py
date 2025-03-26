@@ -40,7 +40,7 @@ def main():
             syslog_file.write(rand_data + '\n')
             
         # 0.1초에서 3초 사이의 랜덤한 시간 간격으로 대기
-        random_interval = random.uniform(0.1, 2)
+        random_interval = random.uniform(0.1, 0.8)
         sleep(random_interval)
 
 if __name__ == '__main__':

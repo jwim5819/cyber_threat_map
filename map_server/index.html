@@ -132,11 +132,17 @@
     </div>
 
     <!-- 필수 스크립트 -->
-    <script src="/env.js"></script>
+    <script>
+    const ENV = {
+      HOST: "{{HOST}}",
+      PORT: "{{PORT}}"
+    }
+    </script>
     <script src="/static/map.js"></script>
 
     <!-- 테이블 데이터 관리를 위한 스크립트 -->
     <script>
+      
       // 컨테이너 리사이징
       const wrapperConainer = document.getElementById("map-container-wrapper");
       const mapConainer = document.getElementById("map-container");

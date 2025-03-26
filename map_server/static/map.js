@@ -1,5 +1,5 @@
 // 웹소켓 연결
-var webSock = new WebSocket("ws://192.168.10.231:8888/websocket");
+var webSock = new WebSocket(`ws://${ENV.HOST}:${ENV.PORT}/websocket`);
 
 
 // 어택 카운트

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # Start redis-server
-# systemctl start redis.service
+systemctl start redis.service
+
+export ENV="LOCAL"
 
 # Start the DataServer
 cd ./data_server

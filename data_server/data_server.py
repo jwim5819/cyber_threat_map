@@ -3,6 +3,7 @@ import maxminddb
 import redis
 import io
 import os
+import logging
 
 from const import META, PORTMAP
 from sys import exit
@@ -48,7 +49,10 @@ def clean_db(unclean):
 def connect_redis():
     print("try to connect redis")
     try:
-        r = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=6379, db=0)
+        if os.getenv("ENV") == "LOCAL":
+            r = redis.StrictRedis(host="127.0.0.1", port=6379, db=0)
+        else: 
+            r = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=6379, db=0)
         print("redis conneted")
     except:
         print("redis failed")
@@ -217,9 +221,8 @@ def main():
                         # 중복 제거 및 키값 변경
                         hq_ip_db_clean = {
                             "dst_country": hq_ip_db_clean.get("country"),
-                            "dst_iso_code": hq_ip_db_clean.get("iso_code")
+                            "dst_iso_code": hq_ip_db_clean.get("iso_code"),
                         }
-                        
 
                         msg_type = {"msg_type": get_msg_type()}
                         msg_type2 = {"msg_type2": syslog_data_dict["type_attack"]}
@@ -251,9 +254,14 @@ def main():
                         )  # local time
                         # event_time = strftime("%Y-%m-%d %H:%M:%S", gmtime()) # UTC time
                         track_flags(super_dict, country_to_code, "country", "iso_code")
-                        track_flags(super_dict, dst_country_to_code, "dst_country", "dst_iso_code")
+                        track_flags(
+                            super_dict,
+                            dst_country_to_code,
+                            "dst_country",
+                            "dst_iso_code",
+                        )
                         track_flags(super_dict, ip_to_code, "src_ip", "iso_code")
-                        
+
                         # Append stats to super_dict
                         super_dict["event_count"] = event_count
                         super_dict["continents_tracked"] = continents_tracked
@@ -270,7 +278,6 @@ def main():
 
                         print("Event Count: {}".format(event_count))
                         print("------------------------")
-
                     else:
                         continue
 
