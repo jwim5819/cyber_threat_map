@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import random, syslog
 from const import PORTMAP
 from sys import exit
@@ -40,7 +38,7 @@ def main():
         syslog.syslog(rand_data)
         with open('/var/log/syslog', 'a') as syslog_file:  # 'a'는 append 모드
             syslog_file.write(rand_data + '\n')
-        sleep(0.8)
+        sleep(0.5)
 
 if __name__ == '__main__':
     try:

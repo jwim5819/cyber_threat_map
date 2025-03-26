@@ -1,94 +1,34 @@
-#!/usr/bin/python3
-
-"""
-AUTHOR: Matthew May - mcmay.web@gmail.com
-"""
-
-# Imports
 import json
-
-# import logging
 import maxminddb
-
-# import re
 import redis
 import io
+import os
 
 from const import META, PORTMAP
-
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
-import os
 from sys import exit
 from dotenv import load_dotenv
-
-# from textwrap import dedent
 from time import gmtime, localtime, sleep, strftime
-
-# start the Redis server if it isn't started already.
-# $ redis-server
-# default port is 6379
-# make sure system can use a lot of memory and overcommit memory
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 redis_instance = None
-
-# required input paths
 syslog_path = "/var/log/syslog"
-# syslog_path = '/var/log/reverse-proxy.log'
 db_path = "../DB/GeoLite2-City.mmdb"
 
-# file to log data
-# log_file_out = '/var/log/map_data_server.out'
+hq_ip = "106.247.87.230"
 
-# ip for headquarters
-hq_ip = "160.94.243.219"
-
-# stats
 server_start_time = strftime("%d-%m-%Y %H:%M:%S", localtime())  # local time
 event_count = 0
 continents_tracked = {}
 countries_tracked = {}
 country_to_code = {}
+dst_country_to_code = {}
 ip_to_code = {}
 ips_tracked = {}
 unknowns = {}
 
-# @IDEA
-# ---------------------------------------------------------
-# Use a class to nicely wrap everything:
-# Could attempt to do an access here
-# now without worrying about key errors,
-# or just keep the filled data structure
-#
-# class Instance(dict):
-#
-#    defaults = {
-#                'city': {'names':{'en':None}},
-#                'continent': {'names':{'en':None}},
-#                'continent': {'code':None},
-#                'country': {'names':{'en':None}},
-#                'country': {'iso_code':None},
-#                'location': {'latitude':None},
-#                'location': {'longitude':None},
-#                'location': {'metro_code':None},
-#                'postal': {'code':None}
-#                }
-#
-#    def __init__(self, seed):
-#        self(seed)
-#        backfill()
-#
-#    def backfill(self):
-#        for default in self.defaults:
-#            if default not in self:
-#                self[default] = defaults[default]
-# ---------------------------------------------------------
-
-
-# Load environment variables from .env file
 load_dotenv()
 
 
-# Create clean dictionary using unclean db dictionary contents
 def clean_db(unclean):
     selected = {}
     for tag in META:
@@ -102,17 +42,13 @@ def clean_db(unclean):
                     head = None
                     break
             selected[tag["lookup"]] = head
-
     return selected
 
 
 def connect_redis():
     print("try to connect redis")
     try:
-        r = redis.StrictRedis(
-            # host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0
-            host=os.getenv("REDIS_HOST"), port=6379, db=0
-        )
+        r = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=6379, db=0)
         print("redis conneted")
     except:
         print("redis failed")
@@ -120,12 +56,9 @@ def connect_redis():
 
 
 def get_msg_type():
-    # @TODO
-    # Add support for more message types later
     return "Traffic"
 
 
-# Check to see if packet is using an interesting TCP/UDP protocol based on source or destination port
 def get_tcp_udp_proto(src_port, dst_port):
     src_port = int(src_port)
     dst_port = int(dst_port)
@@ -144,7 +77,8 @@ def find_hq_lat_long(hq_ip):
         hq_ip_db_clean = clean_db(hq_ip_db_unclean)
         dst_lat = hq_ip_db_clean["latitude"]
         dst_long = hq_ip_db_clean["longitude"]
-        hq_dict = {"dst_lat": dst_lat, "dst_long": dst_long}
+        dst_country = hq_ip_db_clean["country"]
+        hq_dict = {"dst_lat": dst_lat, "dst_long": dst_long, "dst_country": dst_country}
         return hq_dict
     else:
         print("Please provide a valid IP address for headquarters")
@@ -163,12 +97,6 @@ def parse_maxminddb(db_path, ip):
         exit()
     except ValueError:
         return False
-
-
-# @TODO
-# Refactor/improve parsing
-# This function depends heavily on which appliances are generating logs
-# For now it is only here for testing
 
 
 def parse_syslog(line):
@@ -199,7 +127,6 @@ def parse_syslog(line):
 
 def shutdown_and_report_stats():
     print("\nSHUTTING DOWN")
-    # Report stats tracked
     print("\nREPORTING STATS...")
     print("\nEvent Count: {}".format(event_count))  # report event count
     print("\nContinent Stats...")  # report continents stats
@@ -221,32 +148,6 @@ def shutdown_and_report_stats():
     for key in unknowns:
         print("{}: {}".format(key, unknowns[key]))
     exit()
-
-
-# def menu():
-# Instantiate parser
-# parser = ArgumentParser(
-#        prog='DataServer.py',
-#        usage='%(progs)s [OPTIONS]',
-#        formatter_class=RawDescriptionHelpFormatter,
-#        description=dedent('''\
-#                --------------------------------------------------------------
-#                Data server for attack map application.
-#                --------------------------------------------------------------'''))
-
-# @TODO --> Add support for command line args?
-# define command line arguments
-# parser.add_argument('-db', '--database', dest='db_path', required=True, type=str, help='path to maxmind database')
-# parser.add_argument('-m', '--readme', dest='readme', help='print readme')
-# parser.add_argument('-o', '--output', dest='output', help='file to write logs to')
-# parser.add_argument('-r', '--random', action='store_true', dest='randomize', help='generate random IPs/protocols for demo')
-# parser.add_argument('-rs', '--redis-server-ip', dest='redis_ip', type=str, help='redis server ip address')
-# parser.add_argument('-sp', '--syslog-path', dest='syslog_path', type=str, help='path to syslog file')
-# parser.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='run server in verbose mode')
-
-# Parse arguments/options
-# args = parser.parse_args()
-# return args
 
 
 def merge_dicts(*args):
@@ -290,19 +191,11 @@ def main():
         exit()
 
     global db_path, log_file_out, redis_instance, syslog_path, hq_ip
-    global continents_tracked, countries_tracked, ips_tracked, postal_codes_tracked, event_count, unknown, ip_to_code, country_to_code
+    global continents_tracked, countries_tracked, ips_tracked, postal_codes_tracked, event_count, unknown, ip_to_code, country_to_code, dst_country_to_code
 
-    # args = menu()
-
-    # Connect to Redis
     redis_instance = connect_redis()
-    # redis_instance.set("test", "value")
-    # print(redis_instance.get("test"))
-
-    # Find HQ lat/long
     hq_dict = find_hq_lat_long(hq_ip)
 
-    # Follow/parse/format/publish syslog data
     with io.open(syslog_path, "r", encoding="ISO-8859-1") as syslog_file:
         print(f"syslog_path = {syslog_path}")
         syslog_file.readlines()
@@ -319,6 +212,14 @@ def main():
                     if ip_db_unclean:
                         event_count += 1
                         ip_db_clean = clean_db(ip_db_unclean)
+                        hq_ip_db_unclean = parse_maxminddb(db_path, hq_ip)
+                        hq_ip_db_clean = clean_db(hq_ip_db_unclean)
+                        # 중복 제거 및 키값 변경
+                        hq_ip_db_clean = {
+                            "dst_country": hq_ip_db_clean.get("country"),
+                            "dst_iso_code": hq_ip_db_clean.get("iso_code")
+                        }
+                        
 
                         msg_type = {"msg_type": get_msg_type()}
                         msg_type2 = {"msg_type2": syslog_data_dict["type_attack"]}
@@ -333,6 +234,7 @@ def main():
                         super_dict = merge_dicts(
                             hq_dict,
                             ip_db_clean,
+                            hq_ip_db_clean,
                             msg_type,
                             msg_type2,
                             msg_type3,
@@ -349,8 +251,9 @@ def main():
                         )  # local time
                         # event_time = strftime("%Y-%m-%d %H:%M:%S", gmtime()) # UTC time
                         track_flags(super_dict, country_to_code, "country", "iso_code")
+                        track_flags(super_dict, dst_country_to_code, "dst_country", "dst_iso_code")
                         track_flags(super_dict, ip_to_code, "src_ip", "iso_code")
-
+                        
                         # Append stats to super_dict
                         super_dict["event_count"] = event_count
                         super_dict["continents_tracked"] = continents_tracked
@@ -359,17 +262,11 @@ def main():
                         super_dict["unknowns"] = unknowns
                         super_dict["event_time"] = event_time
                         super_dict["country_to_code"] = country_to_code
+                        super_dict["dst_country_to_code"] = dst_country_to_code
                         super_dict["ip_to_code"] = ip_to_code
 
                         json_data = json.dumps(super_dict)
                         redis_instance.publish("attack-map-production", json_data)
-
-                        # if args.verbose:
-                        #    print(ip_db_unclean)
-                        #    print('------------------------')
-                        #    print(json_data)
-                        #    print('Event Count: {}'.format(event_count))
-                        #    print('------------------------')
 
                         print("Event Count: {}".format(event_count))
                         print("------------------------")
