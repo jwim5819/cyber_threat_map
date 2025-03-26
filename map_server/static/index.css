@@ -130,7 +130,7 @@ body {
 }
 
 .sidebar-table-title {
-  color: #ee0c5d;
+  color: #ffffff;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 8px 0;
@@ -183,8 +183,8 @@ body {
 }
 
 .sidebar-table th {
-  background-color: rgba(238, 12, 93, 0.2);
-  color: #ee0c5d;
+  background-color: rgba(251, 255, 0, 0.2);
+  color: #000000;
   font-weight: 600;
   text-align: left;
   padding: 6px;
@@ -245,7 +245,7 @@ body {
 #map {
   width: 100%;
   height: 100%;
-  background: #325147;
+  background: #494949;
 }
 
 .leaflet-container {
@@ -296,12 +296,16 @@ body {
 .bottom-container table {
   width: 100%;
   border-collapse: collapse;
-  color: #fff;
+  color: #ffffff;
   font-size: 1rem;
   table-layout: fixed;
   /* 고정 너비 레이아웃 */
   min-width: 1200px;
   /* 최소 너비 설정 - 작은 화면에서 스크롤 필요 */
+}
+
+.bottom-container table th {
+  color: #000000;
 }
 
 /* 테이블 헤더 고정 스타일 수정 */
@@ -323,8 +327,8 @@ td {
 }
 
 th {
-  background-color: rgba(238, 12, 93, 0.2);
-  color: #ee0c5d;
+  background-color: rgba(251, 255, 0, 0.2);
+  color: rgba(0, 0, 0, 0.2)
   font-weight: 600;
   text-align: left;
   padding: 10px;

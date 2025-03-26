@@ -13,9 +13,9 @@ var map = L.map('map', {
   maxZoom: 3,
   zoomControl: false,
   dragging: true,
-  doubleClickZoom: true,
+  doubleClickZoom: false,
   scrollWheelZoom: true,
-  touchZoom: true,
+  touchZoom: false,
   boxZoom: false,
   keyboard: false,
   attributionControl: false  // 저작권 표시 컨트롤 비활성화
@@ -184,7 +184,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     .attr("d", lineFunction(lineData))
     .attr("opacity", 0.7)
     .attr("stroke", msg.color)
-    .attr("stroke-width", 4)
+    .attr("stroke-width", 4.5)
     .attr("fill", "none");
 
   // 선 애니메이션
