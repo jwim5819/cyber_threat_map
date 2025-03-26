@@ -152,14 +152,14 @@ function handleParticle(msg, srcPoint) {
     .style("stroke", msg.color)
     .style("stroke-opacity", 1)
     .transition()
-    .duration(2000)
+    .duration(4000)
     .ease(Math.sqrt)
     .attr("r", 35)
     .style("stroke-opacity", 1e-6)
     .remove();
 }
 
-// 화살표 트래픽 함수 - 수정됨 (동그라미 제거)
+// handleTraffic 함수를 수정하여 선이 A->B 방향으로 사라지는 애니메이션 추가
 function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
   var fromX = srcPoint["x"];
   var fromY = srcPoint["y"];
@@ -182,9 +182,9 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
   var lineGraph = svg
     .append("path")
     .attr("d", lineFunction(lineData))
-    .attr("opacity", 0.4)
+    .attr("opacity", 0.7)
     .attr("stroke", msg.color)
-    .attr("stroke-width", 5)
+    .attr("stroke-width", 4)
     .attr("fill", "none");
 
   // 선 애니메이션
@@ -193,7 +193,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     .attr("stroke-dasharray", length + " " + length)
     .attr("stroke-dashoffset", length)
     .transition()
-    .duration(1000)
+    .duration(1700)
     .ease("ease-in")
     .attr("stroke-dashoffset", 0)
     .each("end", function () {
@@ -206,19 +206,20 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
         .attr("r", 6)
         .attr("fill", msg.color)
         .transition()
-        .duration(500)
+        .duration(1000)
         .attr("r", 15)
         .style("opacity", 0)
         .remove();
         
-      // 선 제거
+      // A->B 방향으로 선이 사라지는 애니메이션
       d3.select(this)
         .transition()
-        .duration(100)
-        .style("opacity", 0)
+        .duration(1700)
+        .attr("stroke-dashoffset", -length) // 음수값을 주면 반대 방향으로 대시 이동
+        .style("opacity", 0.7)
         .remove();
       
-      // 여기서 나라 이름 마커 삭제!
+      // 나라 이름 마커 삭제
       if (countryMarker) {
         country_name.removeLayer(countryMarker);
       }
