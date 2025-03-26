@@ -7,7 +7,7 @@ let attackCounter = 0;
 
 // 지도 초기화 - 줌 컨트롤 및 드래그 기능 비활성화
 var map = L.map('map', {
-  center: [45.0, 12.0],
+  center: [30.0, 12.0],
   zoom: 2,
   minZoom: 2,
   maxZoom: 3,
@@ -34,7 +34,7 @@ var limitedBounds = L.latLngBounds(
   L.latLng(120, 180)
 );
 
-map.setMaxBounds(worldBounds);
+//map.setMaxBounds(worldBounds);
 
 // 줌 변경 시 경계 업데이트
 map.on('zoomend', function () {
@@ -184,7 +184,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     .attr("d", lineFunction(lineData))
     .attr("opacity", 0.7)
     .attr("stroke", msg.color)
-    .attr("stroke-width", 4.5)
+    .attr("stroke-width", 3.5)
     .attr("fill", "none");
 
   // 선 애니메이션
@@ -266,7 +266,7 @@ function addCountryName(msg, srcLatLng) {
   // 나라명 마커 추가
   var countryIcon = L.divIcon({
     className: 'country-label',
-    html: '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 24px;">' + msg.country + '</div>',
+    html: '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 16px;">' + msg.country + '</div>',
     iconSize: [100, 20],
     iconAnchor: [75, 30]  // 마커 포인트의 정중앙 위에 위치하도록 조정 [width의 1/2, 높이]
   });

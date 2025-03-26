@@ -28,7 +28,7 @@ body {
 /* 제목 컨테이너를 고정 위치로 설정 */
 .title-container {
   position: absolute;
-  top: 0;
+  top: 40px;
   left: 0;
   right: 0;
   height: 120px;
@@ -83,7 +83,7 @@ body {
 .top-container {
   display: flex;
   width: 100%;
-  height: 80%;
+  height: 100%;
 }
 
 .bottom-container {
@@ -105,22 +105,25 @@ body {
 }
 
 .sidebar {
-  width: 30%;
-  background-color: #221925;
+  width: 18%;
+  background-color: #22192500;
   padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   border-radius: 15px;
   margin: 10px 0 10px 10px;
+  position: absolute;
+  left: 0;
+  bottom: 50px;
 }
 
 /* 사이드바 내부 테이블 컨테이너 스타일 */
 .sidebar-table-container {
-  background-color: rgba(34, 25, 37, 0.7);
+  background-color: rgba(34, 25, 37, 0);
   border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 1px;
+  margin-bottom: 1px;
   height: calc(50% - 10px);
   overflow: auto;
   /* 오버플로우를 auto로 변경 */
@@ -131,7 +134,7 @@ body {
 
 .sidebar-table-title {
   color: #ffffff;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   text-align: center;
@@ -141,7 +144,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.8rem;
   table-layout: fixed;
   /* 고정 너비 레이아웃 */
 }
@@ -149,7 +152,7 @@ body {
 /* 사이드바 테이블 열 너비 조정 */
 .sidebar-table th:nth-child(1),
 .sidebar-table td:nth-child(1) {
-  width: 60%;
+  width: 40%;
   text-align: left;
   white-space: nowrap;
   /* 텍스트 줄바꿈 방지 */
@@ -160,16 +163,19 @@ body {
   position: relative;
 }
 
+.sidebar-table th:nth-child(1) {
+  text-align: center;
+}
 .sidebar-table th:nth-child(2),
 .sidebar-table td:nth-child(2) {
-  width: 20%;
+  width: 30%;
   text-align: center;
 }
 
 .sidebar-table th:nth-child(3),
 .sidebar-table td:nth-child(3) {
   width: 20%;
-  text-align: right;
+  text-align: center;
 }
 
 /* 사이드바 테이블 셀 스타일 수정 */
@@ -178,29 +184,23 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
   text-overflow: ellipsis;
-  height: 22px;
+  height: 16px;
   /* 최소 높이 설정 */
 }
 
 .sidebar-table th {
-  background-color: rgba(251, 255, 0, 0.2);
-  color: #000000;
+  background-color: rgba(50, 96, 117, 0.623);
+  color: #ffffff;
   font-weight: 600;
-  text-align: left;
-  padding: 6px;
+  text-align: center;
+  padding: 3px;
   font-size: 1rem;
   position: sticky;
   top: 0;
   z-index: 1;
+  height: 16px;
 }
 
-.sidebar-table td {
-  padding: 5px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 /* 공격 추이 화살표 스타일 */
 .trend-up {

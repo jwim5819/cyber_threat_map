@@ -43,8 +43,6 @@
       .scaled .map-container {
         /* 가로세로 비율에 따른 스케일 적용 */
         transform: translate(-50%, -50%) scale(var(--scale-ratio));
-
-    
       }
     </style>
   </head>
@@ -60,8 +58,13 @@
 
       <!-- 메인 콘텐츠 래퍼 -->
       <div class="content-wrapper">
-        <div class="top-container">
-          <!-- 왼쪽 사이드바 -->
+        <!-- 메인 지도 컨테이너 (전체 영역 차지) -->
+        <div class="map-container-wrapper" id="map-container-wrapper">
+          <div class="map-container" id="map-container">
+            <div id="map"></div>
+          </div>
+          
+          <!-- 사이드바 (지도 위에 오버레이) -->
           <div class="sidebar">
             <!-- 공격 국가 TOP5 테이블 -->
             <div class="sidebar-table-container">
@@ -96,36 +99,6 @@
                 </tbody>
               </table>
             </div>
-          </div>
-
-          <!-- 오른쪽 지도 컨테이너 -->
-          <div class="map-container-wrapper" id="map-container-wrapper">
-            <div class="map-container" id="map-container">
-              <div id="map"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 하단 영역 (테이블) -->
-        <div class="bottom-container">
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>발생시각</th>
-                  <th>출발지 IP</th>
-                  <th>출발지 국가</th>
-                  <th>출발지 PORT</th>
-                  <th>목적지 IP</th>
-                  <th>목적지 국가</th>
-                  <th>목적지 PORT</th>
-                  <th>공격 유형</th>
-                </tr>
-              </thead>
-              <tbody id="attack-log">
-                <!-- 테이블 내용은 JavaScript에서 동적으로 추가됨 -->
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -163,27 +136,14 @@
       }
       resizeConainer()
       
-
-      // 토글 버튼 클릭 이벤트
-      /*
-      toggleButton.addEventListener("click", () => {
-        document.body.classList.toggle("scaled", scaled);
-        resizeConainer();
-      });
-      */
-      
       // 창크기변화 감지
       window.addEventListener('resize', resizeConainer);
       // 전체화면 감지
       window.addEventListener('fullscreenchange', resizeConainer);
-      // 새로고침 감지
-
 
       // 공격 로그 데이터를 저장할 배열들
-      let attackLogs = [];
       let countryAttackStats = {};
       let attackTypeStats = {};
-      const MAX_LOGS = 100; // 최대 100개까지만 저장
 
       // 국가별 통계 업데이트 함수
       function updateCountryStats(country, countryToCodeMap) {
@@ -324,53 +284,7 @@
         });
       }
 
-      // 테이블 업데이트 함수
-      function updateAttackTable(newAttack) {
-        // 배열 맨 앞에 새 데이터 추가
-        attackLogs.unshift(newAttack);
-
-        // 최대 개수 제한
-        if (attackLogs.length > MAX_LOGS) {
-          attackLogs = attackLogs.slice(0, MAX_LOGS);
-        }
-
-        // 테이블 업데이트
-        const tableBody = document.getElementById("attack-log");
-        tableBody.innerHTML = ""; // 테이블 초기화
-
-        // 데이터 채우기
-        attackLogs.forEach((log) => {
-          const row = document.createElement("tr");
-
-          // 국기 이미지 태그 생성 (출발지)
-          let srcFlagImg = "";
-          if (log.srcCountryCode) {
-            srcFlagImg = `<img src="/static/flags/${log.srcCountryCode}.png" alt="${log.srcCountry} 국기" class="country-flag">`;
-          }
-
-          // 국기 이미지 태그 생성 (목적지)
-          let dstFlagImg = "";
-          if (log.dstCountryCode) {
-            dstFlagImg = `<img src="/static/flags/${log.dstCountryCode}.png" alt="${log.dstCountry} 국기" class="country-flag">`;
-          }
-
-          // 각 열에 데이터 추가
-          row.innerHTML = `
-                    <td>${log.eventTime}</td>
-                    <td>${log.srcIp}</td>
-                    <td>${srcFlagImg} ${log.srcCountry}</td>
-                    <td>${log.srcPort}</td>
-                    <td>${log.dstIp}</td>
-                    <td>${dstFlagImg} ${log.dstCountry}</td>
-                    <td>${log.dstPort}</td>
-                    <td>${log.attackType}</td>
-                `;
-
-          tableBody.appendChild(row);
-        });
-      }
-
-      // 웹소켓으로부터 데이터를 받을 때 테이블 업데이트 (기존 웹소켓 코드 확장)
+      // 웹소켓으로부터 데이터를 받을 때 통계 업데이트 (기존 웹소켓 코드 확장)
       const originalOnMessage = webSock.onmessage;
       webSock.onmessage = function (e) {
         // 기존 웹소켓 처리 로직 실행
@@ -381,34 +295,14 @@
         try {
           const msg = JSON.parse(e.data);
           if (msg.type === "Traffic") {
-            // 새 공격 로그 생성
-            const newAttack = {
-              eventTime: new Date().toLocaleTimeString(),
-              srcIp: msg.src_ip || "Unknown",
-              srcCountry: msg.country || "Unknown",
-              srcCountryCode: msg.country_to_code
-                ? msg.country_to_code[msg.country] || ""
-                : "",
-              srcPort: msg.src_port || "Unknown",
-              dstIp: msg.dst_ip || "Unknown",
-              dstCountry: msg.dst_country || "Unknown",
-              dstCountryCode: msg.dst_country_to_code
-                ? msg.dst_country_to_code[msg.dst_country] || ""
-                : "",
-              dstPort: msg.dst_port || "Unknown",
-              attackType: msg.protocol || "Unknown",
-            };
-            // 메인 테이블 업데이트
-            updateAttackTable(newAttack);
-
             // 국가별 통계 업데이트
-            updateCountryStats(newAttack.srcCountry, msg.country_to_code);
+            updateCountryStats(msg.country || "Unknown", msg.country_to_code);
 
             // 공격 유형별 통계 업데이트
-            updateAttackTypeStats(newAttack.attackType);
+            updateAttackTypeStats(msg.protocol || "Unknown");
           }
         } catch (err) {
-          console.log("Error processing message for table:", err);
+          console.log("Error processing message for statistics:", err);
         }
       };
 
