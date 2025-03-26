@@ -1,21 +1,11 @@
-#!/usr/bin/python3
-
-"""
-AUTHOR: Matthew May - mcmay.web@gmail.com
-"""
-
-# Imports
 import json
 import redis
 import tornadoredis
 import subprocess
 
-# import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-
-# import re
 
 from dotenv import load_dotenv
 import os
@@ -144,6 +134,10 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
             dst_long = json_data["dst_long"]
         else:
             dst_long = None
+        if "dst_country" in json_data:
+            dst_country = json_data["dst_country"]
+        else:
+            dst_country = None
         if "city" in json_data:
             city = json_data["city"]
         else:
@@ -200,6 +194,10 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
             country_to_code = json_data["country_to_code"]
         else:
             country_to_code = None
+        if "dst_country_to_code" in json_data:
+            dst_country_to_code = json_data["dst_country_to_code"]
+        else:
+            dst_country_to_code = None
         if "ip_to_code" in json_data:
             ip_to_code = json_data["ip_to_code"]
         else:
@@ -218,6 +216,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
             "src_long": src_long,
             "dst_lat": dst_lat,
             "dst_long": dst_long,
+            "dst_country": dst_country,
             "city": city,
             "continent": continent,
             "continent_code": continent_code,
@@ -233,6 +232,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
             "unknowns": unknowns,
             "event_time": event_time,
             "country_to_code": country_to_code,
+            "dst_country_to_code": dst_country_to_code,
             "ip_to_code": ip_to_code,
         }
 

@@ -5,7 +5,7 @@ var webSock = new WebSocket("ws://192.168.10.231:8888/websocket");
 var map = L.map('map', {
   center: [45.0, 12.0],
   zoom: 2,
-  minZoom: 2,
+  minZoom: 1,
   maxZoom: 3,
   zoomControl: true,
   dragging: true,
@@ -14,8 +14,6 @@ var map = L.map('map', {
   touchZoom: true,
   boxZoom: false,
   keyboard: false,
-  zoomSnap: 0.1,
-  zoomDelta: 0.1,
   attributionControl: false  // 저작권 표시 컨트롤 비활성화
 });
 
@@ -43,6 +41,10 @@ map.on('zoomend', function () {
   }
 });
 
+map.on('resize', function () {
+  map.invalidateSize();
+})
+
 
 // 타일 레이어 추가
 const tileUrl = '/static/mapbox_tiles/{z}/{x}/{y}.png';
@@ -51,16 +53,19 @@ L.tileLayer(tileUrl, {
   zoomOffset: -1
 }).addTo(map);
 
-// 본부 위치 설정
-var hqLatLng = new L.LatLng(window._env_.HD_LAT, window._env_.HD_LNG);
 
-// 본부 마커 추가
-L.circle(hqLatLng, 110000, {
+// 목적지 위경도좌표
+/* 
+var dstLatLng = new L.LatLng(window._env_.HD_LAT, window._env_.HD_LNG);
+*/
+// 목적지 마커 추가
+/*
+L.circle(dstLatLng, 110000, {
   color: "red",
   fillColor: "yellow",
   fillOpacity: 0.5,
 }).addTo(map);
-
+*/
 // SVG 추가
 var svg = d3
   .select(map.getPanes().overlayPane)
@@ -256,9 +261,9 @@ function addCountryName(msg, srcLatLng) {
   // 나라명 마커 추가
   var countryIcon = L.divIcon({
     className: 'country-label',
-    html: '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 100px;">' + msg.country + '</div>',
+    html: '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 24px;">' + msg.country + '</div>',
     iconSize: [100, 20],
-    iconAnchor: [50, 30]  // 마커 포인트의 정중앙 위에 위치하도록 조정
+    iconAnchor: [75, 30]  // 마커 포인트의 정중앙 위에 위치하도록 조정 [width의 1/2, 높이]
   });
   
   // 나라명 마커 생성 및 추가
@@ -276,8 +281,9 @@ webSock.onmessage = function (e) {
   try {
     var msg = JSON.parse(e.data);
     if (msg.type === "Traffic") {
+      var dstLatLng = new L.LatLng(msg.dst_lat, msg.dst_long);
       var srcLatLng = new L.LatLng(msg.src_lat, msg.src_long);
-      var hqPoint = map.latLngToLayerPoint(hqLatLng);
+      var hqPoint = map.latLngToLayerPoint(dstLatLng);
       var srcPoint = map.latLngToLayerPoint(srcLatLng);
       addCircle(msg, srcLatLng);
       // 수정된 부분: 반환값인 marker 저장

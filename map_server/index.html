@@ -26,8 +26,8 @@
         <!-- 제목 컨테이너 (고정 위치) -->
         <div class="title-container">
             <h1 class="title">LIVE CYBER THREAT MAP</h1>
-            <p class="subtitle">151,223 ATTACKS ON THIS DAY</p>
-        </div> 
+            <p class="subtitle">???,??? ATTACKS ON THIS DAY</p>
+        </div>
         
         <!-- 메인 콘텐츠 래퍼 -->
         <div class="content-wrapper">
@@ -106,6 +106,29 @@
     
     <!-- 테이블 데이터 관리를 위한 스크립트 -->
     <script>
+        // 컨테이너 리사이징
+        const topConainer = document.getElementById('top-container');
+        const mapConainer = document.getElementById('map-container');
+
+        function resizeConainer() {
+            const topConainerWidth = topConainer.offsetWidth;
+            const topConainerHeight = topConainer.offsetHeight;
+
+            // 스케일 비율 계산
+            const widthRatio = topConainerWidth / 1030;
+            const heightRatio = topConainerHeight / 700;
+            const scaleRatio = Math.min(widthRatio, heightRatio)
+
+            // CSS 변수로 스케일 비율 설정
+            document.documentElement.style.setProperty('--scale-ratio', scaleRatio)
+        }
+        
+        // 창크기 변경 시 이벤트
+        window.addEventListener('resize', () => {
+            updateContainerInfo();
+            
+        });
+
         // 공격 로그 데이터를 저장할 배열들
         let attackLogs = [];
         let countryAttackStats = {};
@@ -114,7 +137,7 @@
         
         // 국가별 통계 업데이트 함수
         function updateCountryStats(country, countryToCodeMap) {
-            if (!country || country === "파싱 안됨?") return;
+            if (!country || country === "Unknown") return;
             
             // 국가 코드 찾기
             let countryCode = "";
@@ -142,7 +165,7 @@
         
         // 공격 유형별 통계 업데이트 함수
         function updateAttackTypeStats(attackType) {
-            if (!attackType || attackType === "파싱 안됨?") return;
+            if (!attackType || attackType === "Unknown") return;
             
             if (!attackTypeStats[attackType]) {
                 attackTypeStats[attackType] = {
@@ -309,17 +332,16 @@
                     // 새 공격 로그 생성
                     const newAttack = {
                         eventTime: new Date().toLocaleTimeString(),
-                        srcIp: msg.src_ip || "파싱 안됨?",
-                        srcCountry: msg.country || "파싱 안됨?",
+                        srcIp: msg.src_ip || "Unknown",
+                        srcCountry: msg.country || "Unknown",
                         srcCountryCode: msg.country_to_code ? msg.country_to_code[msg.country] || "" : "",
-                        srcPort: msg.src_port || "파싱 안됨?",
-                        dstIp: msg.dst_ip || "파싱 안됨?",
-                        dstCountry: msg.dst_country || "United States",
-                        dstCountryCode: msg.country_to_code ? msg.country_to_code["United States"] || "US" : "US",
-                        dstPort: msg.dst_port || "파싱 안됨?",
-                        attackType: msg.protocol || "파싱 안됨?"
+                        srcPort: msg.src_port || "Unknown",
+                        dstIp: msg.dst_ip || "Unknown",
+                        dstCountry: msg.dst_country || "Unknown",
+                        dstCountryCode: msg.dst_country_to_code ? msg.dst_country_to_code[msg.dst_country] || "" : "",
+                        dstPort: msg.dst_port || "Unknown",
+                        attackType: msg.protocol || "Unknown"
                     };
-                    
                     // 메인 테이블 업데이트
                     updateAttackTable(newAttack);
                     
@@ -334,45 +356,7 @@
             }
         };
         
-        // 초기 더미 데이터로 설정
-        // (실제 데이터가 들어오기 전에 표시할 목적)
         window.addEventListener('load', function() {
-            /*
-            // 국가별 통계 초기화
-            const initialCountries = [
-                { name: "중국", count: 1245, trend: "up", code: "CN" },
-                { name: "러시아", count: 945, trend: "up", code: "RU" },
-                { name: "미국", count: 742, trend: "down", code: "US" },
-                { name: "브라질", count: 451, trend: "same", code: "BR" },
-                { name: "인도", count: 389, trend: "up", code: "IN" }
-            ];
-            
-            initialCountries.forEach(country => {
-                countryAttackStats[country.name] = {
-                    count: country.count,
-                    trend: country.trend,
-                    code: country.code
-                };
-            });
-            
-            // 공격 유형별 통계 초기화
-            const initialTypes = [
-                { name: "SQL Injection", count: 876, trend: "up" },
-                { name: "DDoS", count: 645, trend: "down" },
-                { name: "XSS", count: 532, trend: "up" },
-                { name: "Brute Force", count: 487, trend: "same" },
-                { name: "Phishing", count: 351, trend: "up" }
-            ];
-            
-            initialTypes.forEach(type => {
-                attackTypeStats[type.name] = {
-                    count: type.count,
-                    trend: type.trend
-                };
-            });
-            */
-            
-            // 초기 테이블 업데이트
             updateCountryTable();
             updateAttackTypeTable();
         });
