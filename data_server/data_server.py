@@ -51,7 +51,7 @@ def connect_redis():
     try:
         if os.getenv("ENV") == "LOCAL":
             r = redis.StrictRedis(host="127.0.0.1", port=6379, db=0)
-        else: 
+        else:
             r = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=6379, db=0)
         print("redis conneted")
     except:
@@ -162,6 +162,10 @@ def merge_dicts(*args):
 
 
 def track_flags(super_dict, tracking_dict, key1, key2):
+    # 너무 길어지는 것 방지
+    if len(tracking_dict) >= 50:
+        return None
+
     if key1 in super_dict:
         if key2 in super_dict:
             if key1 in tracking_dict:
@@ -177,9 +181,18 @@ def track_flags(super_dict, tracking_dict, key1, key2):
 def track_stats(super_dict, tracking_dict, key):
     if key in super_dict:
         node = super_dict[key]
+
+        # 노드가 이미 tracking_dict에 있으면 증가
         if node in tracking_dict:
             tracking_dict[node] += 1
         else:
+            # tracking_dict가 꽉 찼는지 확인
+            if len(tracking_dict) >= 50:
+                # 가장 낮은 빈도의 항목 찾기
+                min_key = min(tracking_dict, key=tracking_dict.get)
+                # 가장 낮은 빈도의 항목 제거
+                del tracking_dict[min_key]
+            # 새 항목 추가
             tracking_dict[node] = 1
     else:
         if key in unknowns:
