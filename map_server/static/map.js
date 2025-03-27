@@ -51,13 +51,13 @@ map.on('resize', function () {
 
 
 // 타일 레이어 추가
-const tileUrl = '/static/mapbox_tiles/{z}/{x}/{y}.png';
+const tileUrl = '/static/mapbox_tiles_transparency_land/{z}/{x}/{y}.png';
 L.tileLayer(tileUrl, {
   tileSize: 256,
   zoomOffset: 0
 }).addTo(map);
 
-
+/*
 var imageUrl = 'static/images/worldmap-bg.png';
 var latLngBounds = L.latLngBounds([[-55, -170], [75, 210]]);
 
@@ -65,7 +65,7 @@ var imageOverlay = L.imageOverlay(imageUrl, latLngBounds, {
     opacity: 1,
     interactive: true
 }).addTo(map);
-
+*/
 
 // 목적지 위경도좌표
 /* 
@@ -108,6 +108,63 @@ function translateSVG() {
 function update() {
   translateSVG();
 }
+
+
+// 애니메이션 원 효과 생성 함수
+function createFixedCircleEffect(svgId, color) {
+  const svg = document.getElementById(svgId);
+  
+  // 기존 내용 제거
+  while (svg.firstChild) {
+    svg.removeChild(svg.firstChild);
+  }
+
+  // 배경 원
+  const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  bgCircle.setAttribute("cx", "40");
+  bgCircle.setAttribute("cy", "40");
+  bgCircle.setAttribute("r", "18");
+  bgCircle.setAttribute("fill", color);
+  bgCircle.setAttribute("fill-opacity", "0.3");
+  bgCircle.classList.add("bg-circle");
+  svg.appendChild(bgCircle);
+  
+  // 가운데 원
+  const inCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  inCircle.setAttribute("cx", "40");
+  inCircle.setAttribute("cy", "40");
+  inCircle.setAttribute("r", "6");
+  inCircle.setAttribute("fill", color);
+  inCircle.setAttribute("fill-opacity", "0.6");
+  inCircle.classList.add("inner-circle");
+  svg.appendChild(inCircle);
+  
+  // 애니메이션 원 추가
+  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  circle.setAttribute("cx", "40");
+  circle.setAttribute("cy", "40");
+  circle.setAttribute("r", "1");
+  circle.setAttribute("stroke", color);
+  circle.setAttribute("stroke-opacity", "1");
+  circle.classList.add("animation-circle");
+  
+  svg.appendChild(circle);
+  
+  function animateGrowing() {
+    circle.animate([
+      { r: "4", strokeOpacity: "1" },
+      { r: "18", strokeOpacity: "0" }
+    ], {
+      duration: 2000,
+      easing: "ease-out",
+      iterations: Infinity
+    });
+  }
+  animateGrowing();
+}
+
+
+
 
 // 지도 이동 시 업데이트
 map.on("moveend", update);
@@ -193,7 +250,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     .attr("d", lineFunction(lineData))
     .attr("opacity", 0.7)
     .attr("stroke", msg.color)
-    .attr("stroke-width", 3.5)
+    .attr("stroke-width", 2.5)
     .attr("fill", "none");
 
   // 선 애니메이션

@@ -25,26 +25,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/index.css" />
-    <style>
-      #toggleScale {
-        padding: 8px 16px;
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-right: 10px;
-      }
-
-      #toggleScale:hover {
-        background-color: #45a049;
-      }
-
-      .scaled .map-container {
-        /* 가로세로 비율에 따른 스케일 적용 */
-        transform: translate(-50%, -50%) scale(var(--scale-ratio));
-      }
-    </style>
   </head>
 
   <body>
@@ -64,7 +44,6 @@
           <div class="map-container" id="map-container">
             <div id="map"></div>
           </div>
-          
 
           <!-- 지도 이미지 오버레이 
           <div calss="custom-map-image" id="custom-map-image">
@@ -108,16 +87,32 @@
               </table>
             </div>
           </div>
+          <!-- 공격유형 아이콘 컨테이너 -->
+          <div class="attack-type-container" id="attack-type-container">
+            <!-- 여기에 애니메이션 원들이 추가됩니다 -->
+            <div class="attack-type">
+              <svg id="svg1"></svg>
+              <div class="attack-type-label">Malware</div>
+            </div>
+            <div class="attack-type">
+              <svg id="svg2"></svg>
+              <div class="attack-type-label">Phishing</div>
+            </div>
+            <div class="attack-type">
+              <svg id="svg3"></svg>
+              <div class="attack-type-label">Exploit</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 필수 스크립트 -->
     <script>
-    const ENV = {
-      HOST: "{{HOST}}",
-      PORT: "{{PORT}}"
-    }
+      const ENV = {
+        HOST: "{{HOST}}",
+        PORT: "{{PORT}}",
+      };
     </script>
     <script src="/static/map.js"></script>
 
@@ -142,12 +137,12 @@
         // CSS 변수로 스케일 비율 설정
         document.documentElement.style.setProperty("--scale-ratio", scaleRatio);
       }
-      resizeConainer()
-      
+      resizeConainer();
+
       // 창크기변화 감지
-      window.addEventListener('resize', resizeConainer);
+      window.addEventListener("resize", resizeConainer);
       // 전체화면 감지
-      window.addEventListener('fullscreenchange', resizeConainer);
+      window.addEventListener("fullscreenchange", resizeConainer);
 
       // 공격 로그 데이터를 저장할 배열들
       let countryAttackStats = {};
@@ -317,6 +312,11 @@
       window.addEventListener("load", function () {
         updateCountryTable();
         updateAttackTypeTable();
+        
+        // 애니메이션 원 생성
+        createFixedCircleEffect("svg1", "#FF1D25");
+        createFixedCircleEffect("svg2", "#B81FFF");
+        createFixedCircleEffect("svg3", "#FFB72D");
       });
     </script>
   </body>
