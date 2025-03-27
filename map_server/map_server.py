@@ -1,5 +1,5 @@
 import json
-import redis
+import re
 import tornadoredis
 import subprocess
 

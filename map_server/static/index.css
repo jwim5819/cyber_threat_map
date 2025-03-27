@@ -1,42 +1,68 @@
-/* 기본 스타일 */
+/* ===== 기본 설정 ===== */
 html,
 body {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  /* background: #221925; */
   background: url("images/background.png");
+  background-size: cover;
   overflow: hidden;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
     Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
     "Malgun Gothic", sans-serif;
 }
 
-/* 전체 레이아웃 재구성 */
+/* ===== 레이아웃 컨테이너 ===== */
 .container {
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  /* 왼쪽 정렬로 변경 */
-  padding: 0 10px;
-  /* 좌우 패딩 추가 */
+  align-items: flex-start; /* 왼쪽 정렬 */
+  padding: 0 10px; /* 좌우 패딩 */
 }
 
-/* 제목 컨테이너를 고정 위치로 설정 */
+.content-wrapper {
+  width: 100%;
+  height: 100%;
+  padding-top: 120px; /* 제목 컨테이너 높이만큼 상단 패딩 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 왼쪽 정렬 */
+  box-sizing: border-box;
+  overflow: hidden; /* 넘치는 부분 숨김 */
+}
+
+.top-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.bottom-container {
+  width: 100%; /* 전체 너비 사용 */
+  background-color: rgba(34, 25, 37, 0.7);
+  border-radius: 15px;
+  margin-top: 20px;
+  padding: 15px;
+  box-sizing: border-box;
+  height: 20%; /* 고정 높이 */
+  min-height: 220px; /* 최소 높이 보장 */
+  margin-bottom: 15px; /* 하단 여백 */
+  margin-left: 0; /* 왼쪽 여백 제거 */
+}
+
+/* ===== 헤더 섹션 ===== */
 .title-container {
   position: absolute;
   top: 40px;
   left: 0;
   right: 0;
-  height: 120px;
-  /* 고정 높이 */
+  height: 120px; /* 고정 높이 */
   display: flex;
-  flex-direction: column;
-  /* 세로 방향 배치로 변경 */
+  flex-direction: column; /* 세로 방향 배치 */
   align-items: center;
   justify-content: center;
   z-index: 10;
@@ -51,13 +77,11 @@ body {
   letter-spacing: -0.5px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   text-align: center;
-  line-height: 1.2;
-  /* 줄 간격 조정 */
+  line-height: 1.2; /* 줄 간격 조정 */
 }
 
 .subtitle {
-  color: #3281b9;
-  /* 요청하신 색상 */
+  color: #3281b9; /* 파란색 강조 */
   font-size: 2rem;
   font-weight: 600;
   margin-top: 8px;
@@ -66,162 +90,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* 메인 콘텐츠 컨테이너 */
-.content-wrapper {
-  width: 100%;
-  height: 100%;
-  padding-top: 120px;
-  /* 제목 컨테이너 높이만큼 상단 패딩 증가 */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* 왼쪽 정렬로 변경 */
-  box-sizing: border-box;
-  overflow: hidden;
-  /* 넘치는 부분 숨김 */
-}
-
-.top-container {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-.tag-container {
-  width: 100%;
-  height: 100px;
-  bottom: 100px;
-}
-
-.bottom-container {
-  width: 100%;
-  /* 전체 너비 사용 */
-  background-color: rgba(34, 25, 37, 0.7);
-  border-radius: 15px;
-  margin-top: 20px;
-  padding: 15px;
-  box-sizing: border-box;
-  height: 20%;
-  /* 고정 높이 */
-  min-height: 220px;
-  /* 최소 높이 보장 */
-  margin-bottom: 15px;
-  /* 하단 여백 추가 */
-  margin-left: 0;
-  /* 왼쪽 여백 제거 */
-}
-
-.sidebar {
-  width: 18%;
-  background-color: #22192500;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-radius: 15px;
-  margin: 10px 0 10px 10px;
-  position: absolute;
-  left: 0;
-  bottom: 30px;
-}
-
-/* 사이드바 내부 테이블 컨테이너 스타일 */
-.sidebar-table-container {
-  background-color: rgba(34, 25, 37, 0);
-  border-radius: 10px;
-  padding: 1px;
-  margin-bottom: 1px;
-  height: calc(50% - 10px);
-  overflow: auto;
-  /* 오버플로우를 auto로 변경 */
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.sidebar-table-title {
-  color: #ffffff;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  text-align: center;
-}
-
-.sidebar-table {
-  width: 100%;
-  border-collapse: collapse;
-  color: #fff;
-  font-size: 0.8rem;
-  table-layout: fixed;
-  /* 고정 너비 레이아웃 */
-}
-
-/* 사이드바 테이블 열 너비 조정 */
-.sidebar-table th:nth-child(1),
-.sidebar-table td:nth-child(1) {
-  width: 40%;
-  text-align: left;
-  white-space: nowrap;
-  /* 텍스트 줄바꿈 방지 */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* 넘치는 텍스트에 ... 표시 */
-  padding-right: 5px;
-  position: relative;
-}
-
-.sidebar-table th:nth-child(1) {
-  text-align: center;
-}
-.sidebar-table th:nth-child(2),
-.sidebar-table td:nth-child(2) {
-  width: 30%;
-  text-align: center;
-}
-
-.sidebar-table th:nth-child(3),
-.sidebar-table td:nth-child(3) {
-  width: 20%;
-  text-align: center;
-}
-
-/* 사이드바 테이블 셀 스타일 수정 */
-.sidebar-table td {
-  padding: 5px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  height: 16px;
-  /* 최소 높이 설정 */
-}
-
-.sidebar-table th {
-  background-color: rgba(50, 96, 117, 0.623);
-  color: #ffffff;
-  font-weight: 600;
-  text-align: center;
-  padding: 3px;
-  font-size: 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  height: 16px;
-}
-
-
-/* 공격 추이 화살표 스타일 */
-.trend-up {
-  color: #ff4d6d;
-}
-
-.trend-down {
-  color: #4dff88;
-}
-
-.trend-same {
-  color: #ffdd4d;
-}
-
+/* ===== 지도 컨테이너 ===== */
 .map-container-wrapper {
   width: 100%;
   height: 100%;
@@ -253,6 +122,171 @@ body {
   border-radius: 15px;
 }
 
+/* 스케일링 적용 */
+.scaled .map-container {
+  /* 가로세로 비율에 따른 스케일 적용 */
+  transform: translate(-50%, -50%) scale(var(--scale-ratio));
+}
+
+/* ===== 사이드바 스타일 ===== */
+.sidebar {
+  width: 18%;
+  background-color: #22192500;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 15px;
+  margin: 10px 0 10px 10px;
+  position: absolute;
+  left: 0;
+  bottom: 30px;
+}
+
+/* 사이드바 내부 테이블 컨테이너 */
+.sidebar-table-container {
+  background-color: rgba(34, 25, 37, 0);
+  border-radius: 10px;
+  padding: 1px;
+  margin-bottom: 1px;
+  height: calc(50% - 10px);
+  overflow: auto; /* 오버플로우를 auto로 설정 */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.sidebar-table-title {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.sidebar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0; 
+  color: #fff;
+  font-size: 0.8rem;
+  table-layout: fixed;
+  border-radius: 5px; /* 테이블 모서리 라운딩 처리 */
+  overflow: hidden; 
+}
+
+/* 사이드바 테이블 열 너비 조정 */
+.sidebar-table th:nth-child(1),
+.sidebar-table td:nth-child(1) {
+  width: 40%;
+  text-align: left;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 넘치는 텍스트에 ... 표시 */
+  padding-right: 5px;
+  position: relative;
+}
+
+.sidebar-table th:nth-child(1) {
+  text-align: center;
+}
+
+.sidebar-table th:nth-child(2),
+.sidebar-table td:nth-child(2) {
+  width: 30%;
+  text-align: center;
+}
+
+.sidebar-table th:nth-child(3),
+.sidebar-table td:nth-child(3) {
+  width: 20%;
+  text-align: center;
+}
+
+/* 사이드바 테이블 셀 스타일 */
+.sidebar-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 16px; /* 최소 높이 설정 */
+}
+
+.sidebar-table th {
+  background-color: rgba(50, 96, 117, 0.623);
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+  padding: 3px;
+  font-size: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 16px;
+}
+
+/* 국기 이미지 스타일 */
+.country-flag {
+  width: 16px;
+  height: 12px;
+  vertical-align: middle;
+  margin-right: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 공격 추이 화살표 스타일 */
+.trend-up {
+  color: #ff4d6d; /* 상승 - 빨강 */
+}
+
+.trend-down {
+  color: #4dff88; /* 하락 - 초록 */
+}
+
+.trend-same {
+  color: #ffdd4d; /* 유지 - 노랑 */
+}
+
+/* ===== 애니메이션 원 스타일 ===== */
+.attack-type-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 30px;
+  width: 50%;
+  left: 32%;
+}
+
+.attack-type {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 5px;
+}
+
+.attack-type svg {
+  width: 80px;
+  height: 80px;
+}
+
+.attack-type-label {
+  text-align: center;
+  font-size: 22px;
+  margin-top: 0px;
+  color: white;
+}
+
+circle.animation-circle {
+  fill: none;
+  stroke-width: 2;
+}
+
+circle.background-circle {
+  stroke: none;
+  fill-opacity: 0.7;
+}
 
 .circle {
   height: 18px;
@@ -261,27 +295,21 @@ body {
   margin: 0px;
 }
 
-/* 테이블 스타일 */
+/* ===== 테이블 스타일 ===== */
 .table-container {
   width: 100%;
   height: 100%;
-  overflow-x: auto;
-  /* 가로 스크롤 활성화 */
-  overflow-y: auto;
-  /* 세로 스크롤 활성화 */
-  scrollbar-width: thin;
-  /* Firefox */
-  scrollbar-color: #ee0c5d #331c35;
-  /* Firefox */
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #ee0c5d #331c35; /* Firefox */
   position: relative;
-  /* 추가: 포지션 컨텍스트 설정 */
 }
 
 /* 웹킷 기반 브라우저용 스크롤바 스타일 */
 .table-container::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
-  /* 가로 스크롤바 높이 */
+  height: 8px; /* 가로 스크롤바 높이 */
 }
 
 .table-container::-webkit-scrollbar-track {
@@ -299,32 +327,27 @@ body {
   border-collapse: collapse;
   color: #ffffff;
   font-size: 1rem;
-  table-layout: fixed;
-  /* 고정 너비 레이아웃 */
-  min-width: 1200px;
-  /* 최소 너비 설정 - 작은 화면에서 스크롤 필요 */
+  table-layout: fixed; /* 고정 너비 레이아웃 */
+  min-width: 1200px; /* 최소 너비 설정 - 작은 화면에서 스크롤 필요 */
 }
 
 .bottom-container table th {
   color: #000000;
 }
 
-/* 테이블 헤더 고정 스타일 수정 */
+/* 테이블 헤더 고정 */
 thead {
   position: sticky;
   top: 0;
   z-index: 2;
-  background-color: #221925;
-  /* 배경색 추가 */
+  background-color: #221925; /* 배경색 추가 */
 }
 
 th,
 td {
-  white-space: nowrap;
-  /* 텍스트 줄바꿈 방지 */
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
   overflow: hidden;
-  text-overflow: ellipsis;
-  /* 너무 긴 텍스트 처리 */
+  text-overflow: ellipsis; /* 너무 긴 텍스트 처리 */
 }
 
 th {
@@ -333,6 +356,20 @@ th {
   font-weight: 600;
   text-align: left;
   padding: 10px;
+}
+
+td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+tr:hover {
+  background-color: rgba(238, 12, 93, 0.1);
+}
+
+/* 짝수/홀수 행 구분 */
+tr:nth-child(even) {
+  background-color: rgba(34, 25, 37, 0.3);
 }
 
 /* 각 열의 너비 설정 */
@@ -383,79 +420,8 @@ td:nth-child(8) {
   width: 24%;
 }
 
-/* ATTACK_TYPE */
-
-td {
-  padding: 8px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-tr:hover {
-  background-color: rgba(238, 12, 93, 0.1);
-}
-
-/* 짝수/홀수 행 구분 */
-tr:nth-child(even) {
-  background-color: rgba(34, 25, 37, 0.3);
-}
-
-/* 국기 이미지 스타일 */
-.country-flag {
-  width: 16px;
-  height: 12px;
-  vertical-align: middle;
-  margin-right: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-
-.scaled .map-container {
-  /* 가로세로 비율에 따른 스케일 적용 */
-  transform: translate(-50%, -50%) scale(var(--scale-ratio));
-}
-
-/* 애니메이션 원 스타일 */
-.attack-type-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  bottom: 30px;
-  width: 50%;
-  left: 32%;
-}
-
-.attack-type {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin: 0 5px;
-}
-
-.attack-type svg {
-  width: 80px;
-  height: 80px;
-}
-
-.attack-type-label {
-  text-align: center;
-  font-size: 12px;
-  margin-top: 5px;
-  color: white;
-}
-
-circle.animation-circle {
-  fill: none;
-  stroke-width: 2;
-}
-
-circle.background-circle {
-  stroke: none;
-  fill-opacity: 0.7;
-}
-
-/* 미디어 쿼리 추가 - 화면이 작아질 때 */
+/* ===== 반응형 미디어 쿼리 ===== */
+/* 중간 크기 화면 */
 @media (max-width: 1236px) {
   .title {
     font-size: 1.8rem;
@@ -466,17 +432,14 @@ circle.background-circle {
   }
 
   .content-wrapper {
-    height: calc(100% - 20px);
-    /* 여백 확보 */
-    justify-content: space-between;
-    /* 공간 분배 변경 */
+    height: calc(100% - 20px); /* 여백 확보 */
+    justify-content: space-between; /* 공간 분배 변경 */
   }
 
   .top-container {
     flex: 1;
     min-height: 200px;
-    max-height: calc(100% - 250px);
-    /* 테이블 영역 확보 */
+    max-height: calc(100% - 250px); /* 테이블 영역 확보 */
   }
 
   .bottom-container {
@@ -512,7 +475,7 @@ circle.background-circle {
   }
 }
 
-/* 아주 작은 화면에 대한 추가 대응 */
+/* 작은 화면 */
 @media (max-height: 700px) {
   .title-container {
     height: 90px;

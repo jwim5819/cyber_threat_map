@@ -1,9 +1,12 @@
 // 웹소켓 연결
 var webSock = new WebSocket(`ws://${ENV.HOST}:${ENV.PORT}/websocket`);
 
-
 // 어택 카운트
 let attackCounter = 0;
+
+// 공격 로그 데이터를 저장할 배열들
+let countryAttackStats = {};
+let attackTypeStats = {};
 
 // 지도 초기화 - 줌 컨트롤 및 드래그 기능 비활성화
 var map = L.map('map', {
@@ -20,7 +23,6 @@ var map = L.map('map', {
   keyboard: false,
   attributionControl: false  // 저작권 표시 컨트롤 비활성화
 });
-
 
 // 전 세계 경계 (줌 레벨 2에서는 제한 X)
 var worldBounds = L.latLngBounds(
@@ -47,8 +49,7 @@ map.on('zoomend', function () {
 
 map.on('resize', function () {
   map.invalidateSize();
-})
-
+});
 
 // 타일 레이어 추가
 const tileUrl = '/static/mapbox_tiles_transparency_land/{z}/{x}/{y}.png';
@@ -57,28 +58,6 @@ L.tileLayer(tileUrl, {
   zoomOffset: 0
 }).addTo(map);
 
-/*
-var imageUrl = 'static/images/worldmap-bg.png';
-var latLngBounds = L.latLngBounds([[-55, -170], [75, 210]]);
-
-var imageOverlay = L.imageOverlay(imageUrl, latLngBounds, {
-    opacity: 1,
-    interactive: true
-}).addTo(map);
-*/
-
-// 목적지 위경도좌표
-/* 
-var dstLatLng = new L.LatLng(window._env_.HD_LAT, window._env_.HD_LNG);
-*/
-// 목적지 마커 추가
-/*
-L.circle(dstLatLng, 110000, {
-  color: "red",
-  fillColor: "yellow",
-  fillOpacity: 0.5,
-}).addTo(map);
-*/
 // SVG 추가
 var svg = d3
   .select(map.getPanes().overlayPane)
@@ -108,7 +87,6 @@ function translateSVG() {
 function update() {
   translateSVG();
 }
-
 
 // 애니메이션 원 효과 생성 함수
 function createFixedCircleEffect(svgId, color) {
@@ -162,9 +140,6 @@ function createFixedCircleEffect(svgId, color) {
   }
   animateGrowing();
 }
-
-
-
 
 // 지도 이동 시 업데이트
 map.on("moveend", update);
@@ -292,7 +267,6 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     });
 }
 
-
 // 원 레이어 추가
 var circles = new L.LayerGroup();
 map.addLayer(circles);
@@ -347,7 +321,248 @@ function addCountryName(msg, srcLatLng) {
   return marker;
 }
 
+// 컨테이너 리사이징 함수
+function resizeContainer() {
+  const wrapperContainer = document.getElementById("map-container-wrapper");
+  const mapContainer = document.getElementById("map-container");
+  let scaled = true;
+  
+  document.body.classList.toggle("scaled", scaled);
+  const wrapperContainerWidth = wrapperContainer.offsetWidth;
+  const wrapperContainerHeight = wrapperContainer.offsetHeight;
 
+  // 스케일 비율 계산
+  const widthRatio = wrapperContainerWidth / 1030;
+  const heightRatio = wrapperContainerHeight / 600;
+  const scaleRatio = Math.min(widthRatio, heightRatio);
+
+  // CSS 변수로 스케일 비율 설정
+  document.documentElement.style.setProperty("--scale-ratio", scaleRatio);
+}
+
+// 국가별 통계 업데이트 함수
+function updateCountryStats(country, countryToCodeMap) {
+  if (!country || country === "Unknown") return;
+
+  // 국가 코드 찾기
+  let countryCode = "";
+  if (countryToCodeMap && typeof countryToCodeMap === "object") {
+    countryCode = countryToCodeMap[country] || "";
+  }
+
+  if (!countryAttackStats[country]) {
+    countryAttackStats[country] = {
+      count: 1,
+      trend: "same", // 기본값
+      code: countryCode,
+    };
+  } else {
+    countryAttackStats[country].count++;
+    countryAttackStats[country].trend = "up"; // 증가 추세로 표시
+    if (countryCode && !countryAttackStats[country].code) {
+      countryAttackStats[country].code = countryCode;
+    }
+  }
+
+  // TOP5 테이블 업데이트
+  updateCountryTable();
+}
+
+// 공격 유형별 통계 업데이트 함수
+function updateAttackTypeStats(attackType) {
+  if (!attackType || attackType === "Unknown") return;
+
+  if (!attackTypeStats[attackType]) {
+    attackTypeStats[attackType] = {
+      count: 1,
+      trend: "same", // 기본값
+    };
+  } else {
+    attackTypeStats[attackType].count++;
+    attackTypeStats[attackType].trend = "up"; // 증가 추세로 표시
+  }
+
+  // TOP5 테이블 업데이트
+  updateAttackTypeTable();
+}
+
+// 국가별 TOP5 테이블 업데이트
+function updateCountryTable() {
+  const tableBody = document.getElementById("country-attack-log");
+  tableBody.innerHTML = ""; // 테이블 초기화
+
+  // 객체를 배열로 변환하고 건수 기준으로 정렬
+  const sortedCountries = Object.keys(countryAttackStats)
+    .map((country) => ({
+      name: country,
+      count: countryAttackStats[country].count,
+      trend: countryAttackStats[country].trend,
+      code: countryAttackStats[country].code,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5); // TOP5만 선택
+
+  // 실제 데이터 행 채우기
+  sortedCountries.forEach((country) => {
+    const row = document.createElement("tr");
+
+    // 트렌드 아이콘 결정
+    let trendIcon = "■";
+    let trendClass = "trend-same";
+
+    if (country.trend === "up") {
+      trendIcon = "▲";
+      trendClass = "trend-up";
+    } else if (country.trend === "down") {
+      trendIcon = "▼";
+      trendClass = "trend-down";
+    }
+
+    // 국기 이미지 태그 생성
+    let flagImg = "";
+    if (country.code) {
+      flagImg = `<img src="/static/flags/${country.code}.png" alt="${country.name} 국기" class="country-flag">`;
+    }
+
+    // 각 열에 데이터 추가
+    row.innerHTML = `
+      <td data-full-text="${country.name}">${flagImg} ${country.name}</td>
+      <td><span class="${trendClass}">${trendIcon}</span></td>
+      <td>${country.count.toLocaleString()}</td>
+    `;
+
+    tableBody.appendChild(row);
+  });
+
+  // 남은 빈 행 채우기 (5행을 채울때까지)
+  const remainingRows = 5 - sortedCountries.length;
+  for (let i = 0; i < remainingRows; i++) {
+    const emptyRow = document.createElement("tr");
+    emptyRow.innerHTML = `
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+    `;
+    tableBody.appendChild(emptyRow);
+  }
+}
+
+// 공격 유형별 TOP5 테이블 업데이트
+function updateAttackTypeTable() {
+  const tableBody = document.getElementById("attack-type-log");
+  tableBody.innerHTML = ""; // 테이블 초기화
+
+  // 객체를 배열로 변환하고 건수 기준으로 정렬
+  const sortedTypes = Object.keys(attackTypeStats)
+    .map((type) => ({
+      name: type,
+      count: attackTypeStats[type].count,
+      trend: attackTypeStats[type].trend,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5); // TOP5만 선택
+
+  // 실제 데이터 채우기
+  sortedTypes.forEach((type) => {
+    const row = document.createElement("tr");
+
+    // 트렌드 아이콘 결정
+    let trendIcon = "■";
+    let trendClass = "trend-same";
+
+    if (type.trend === "up") {
+      trendIcon = "▲";
+      trendClass = "trend-up";
+    } else if (type.trend === "down") {
+      trendIcon = "▼";
+      trendClass = "trend-down";
+    }
+
+    // 각 열에 데이터 추가
+    row.innerHTML = `
+      <td data-full-text="${type.name}">${type.name}</td>
+      <td><span class="${trendClass}">${trendIcon}</span></td>
+      <td>${type.count.toLocaleString()}</td>
+    `;
+
+    tableBody.appendChild(row);
+  });
+
+  // 남은 빈 행 채우기 (5행을 채울때까지)
+  const remainingRows = 5 - sortedTypes.length;
+  for (let i = 0; i < remainingRows; i++) {
+    const emptyRow = document.createElement("tr");
+    emptyRow.innerHTML = `
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+    `;
+    tableBody.appendChild(emptyRow);
+  }
+}
+
+// 초기화 및 이벤트 핸들러
+function initializeApp() {
+  // 초기 리사이징 적용
+  resizeContainer();
+  
+  // 창크기변화 감지
+  window.addEventListener("resize", resizeContainer);
+  
+  // 전체화면 감지
+  window.addEventListener("fullscreenchange", resizeContainer);
+  
+  // 테이블 초기화
+  updateCountryTable();
+  updateAttackTypeTable();
+  initializeAttackTypeTable();
+  initializeCountryTable();
+  // 애니메이션 원 생성
+  createFixedCircleEffect("svg1", "#FF1D25");
+  createFixedCircleEffect("svg2", "#B81FFF");
+  createFixedCircleEffect("svg3", "#FFB72D");
+}
+
+// 국가별 TOP5 테이블 초기화 함수
+function initializeCountryTable() {
+  const tableBody = document.getElementById("country-attack-log");
+  tableBody.innerHTML = ""; // 테이블 초기화
+
+  console.log("애미")
+
+  // 5개의 빈 행 추가
+  for (let i = 0; i < 5; i++) {
+    const row = document.createElement("tr");
+    // 플레이스홀더 내용 추가
+    row.innerHTML = `
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+    `;
+    tableBody.appendChild(row);
+  }
+}
+
+// 공격 유형별 TOP5 테이블 초기화
+function initializeAttackTypeTable() {
+  const tableBody = document.getElementById("attack-type-log");
+  tableBody.innerHTML = ""; // 테이블 초기화
+
+  // 5개의 빈 행 추가
+  for (let i = 0; i < 5; i++) {
+    const row = document.createElement("tr");
+    // 플레이스홀더 내용 추가
+    row.innerHTML = `
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+      <td class="empty-row">&nbsp;</td>
+    `;
+    tableBody.appendChild(row);
+  }
+}
+
+
+// 웹소켓 메시지 처리
 webSock.onmessage = function (e) {
   try {
     var msg = JSON.parse(e.data);
@@ -365,8 +580,17 @@ webSock.onmessage = function (e) {
       // 어택카운트 갱신
       attackCounter++;
       document.querySelector('.subtitle').textContent = `${attackCounter.toLocaleString()} ATTACKS ON THIS DAY`;
+      
+      // 국가별 통계 업데이트
+      updateCountryStats(msg.country || "Unknown", msg.country_to_code);
+
+      // 공격 유형별 통계 업데이트
+      updateAttackTypeStats(msg.protocol || "Unknown");
     }
   } catch (err) {
     console.log(err);
   }
 };
+
+// DOM이 로드되면 앱 초기화
+window.addEventListener("load", initializeApp);

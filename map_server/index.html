@@ -28,7 +28,6 @@
   </head>
 
   <body>
-    <!-- <button id="toggleScale">스케일링 켜기/끄기</button> -->
     <div class="container">
       <!-- 제목 컨테이너 (고정 위치) -->
       <div class="title-container">
@@ -44,12 +43,6 @@
           <div class="map-container" id="map-container">
             <div id="map"></div>
           </div>
-
-          <!-- 지도 이미지 오버레이 
-          <div calss="custom-map-image" id="custom-map-image">
-            <img src="static/images/worldmap-bg.png" width="1030" height="700">
-          </div>
-          -->
 
           <!-- 사이드바 (지도 위에 오버레이) -->
           <div class="sidebar">
@@ -107,7 +100,7 @@
       </div>
     </div>
 
-    <!-- 필수 스크립트 -->
+    <!-- map.js로 환경변수 전달 -->
     <script>
       const ENV = {
         HOST: "{{HOST}}",
@@ -115,209 +108,5 @@
       };
     </script>
     <script src="/static/map.js"></script>
-
-    <!-- 테이블 데이터 관리를 위한 스크립트 -->
-    <script>
-      // 컨테이너 리사이징
-      const wrapperConainer = document.getElementById("map-container-wrapper");
-      const mapConainer = document.getElementById("map-container");
-      const toggleButton = document.getElementById("toggleScale");
-      let scaled = true;
-
-      function resizeConainer() {
-        document.body.classList.toggle("scaled", scaled);
-        const wrapperConainerWidth = wrapperConainer.offsetWidth;
-        const wrapperConainerHeight = wrapperConainer.offsetHeight;
-
-        // 스케일 비율 계산
-        const widthRatio = wrapperConainerWidth / 1030;
-        const heightRatio = wrapperConainerHeight / 600;
-        const scaleRatio = Math.min(widthRatio, heightRatio);
-
-        // CSS 변수로 스케일 비율 설정
-        document.documentElement.style.setProperty("--scale-ratio", scaleRatio);
-      }
-      resizeConainer();
-
-      // 창크기변화 감지
-      window.addEventListener("resize", resizeConainer);
-      // 전체화면 감지
-      window.addEventListener("fullscreenchange", resizeConainer);
-
-      // 공격 로그 데이터를 저장할 배열들
-      let countryAttackStats = {};
-      let attackTypeStats = {};
-
-      // 국가별 통계 업데이트 함수
-      function updateCountryStats(country, countryToCodeMap) {
-        if (!country || country === "Unknown") return;
-
-        // 국가 코드 찾기
-        let countryCode = "";
-        if (countryToCodeMap && typeof countryToCodeMap === "object") {
-          countryCode = countryToCodeMap[country] || "";
-        }
-
-        if (!countryAttackStats[country]) {
-          countryAttackStats[country] = {
-            count: 1,
-            trend: "same", // 기본값
-            code: countryCode,
-          };
-        } else {
-          countryAttackStats[country].count++;
-          countryAttackStats[country].trend = "up"; // 증가 추세로 표시
-          if (countryCode && !countryAttackStats[country].code) {
-            countryAttackStats[country].code = countryCode;
-          }
-        }
-
-        // TOP5 테이블 업데이트
-        updateCountryTable();
-      }
-
-      // 공격 유형별 통계 업데이트 함수
-      function updateAttackTypeStats(attackType) {
-        if (!attackType || attackType === "Unknown") return;
-
-        if (!attackTypeStats[attackType]) {
-          attackTypeStats[attackType] = {
-            count: 1,
-            trend: "same", // 기본값
-          };
-        } else {
-          attackTypeStats[attackType].count++;
-          attackTypeStats[attackType].trend = "up"; // 증가 추세로 표시
-        }
-
-        // TOP5 테이블 업데이트
-        updateAttackTypeTable();
-      }
-
-      // 국가별 TOP5 테이블 업데이트
-      function updateCountryTable() {
-        const tableBody = document.getElementById("country-attack-log");
-        tableBody.innerHTML = ""; // 테이블 초기화
-
-        // 객체를 배열로 변환하고 건수 기준으로 정렬
-        const sortedCountries = Object.keys(countryAttackStats)
-          .map((country) => ({
-            name: country,
-            count: countryAttackStats[country].count,
-            trend: countryAttackStats[country].trend,
-            code: countryAttackStats[country].code,
-          }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5); // TOP5만 선택
-
-        // 데이터 채우기
-        sortedCountries.forEach((country) => {
-          const row = document.createElement("tr");
-
-          // 트렌드 아이콘 결정
-          let trendIcon = "■";
-          let trendClass = "trend-same";
-
-          if (country.trend === "up") {
-            trendIcon = "▲";
-            trendClass = "trend-up";
-          } else if (country.trend === "down") {
-            trendIcon = "▼";
-            trendClass = "trend-down";
-          }
-
-          // 국기 이미지 태그 생성
-          let flagImg = "";
-          if (country.code) {
-            flagImg = `<img src="/static/flags/${country.code}.png" alt="${country.name} 국기" class="country-flag">`;
-          }
-
-          // 각 열에 데이터 추가
-          row.innerHTML = `
-                    <td data-full-text="${country.name}">${flagImg} ${
-            country.name
-          }</td>
-                    <td><span class="${trendClass}">${trendIcon}</span></td>
-                    <td>${country.count.toLocaleString()}</td>
-                `;
-
-          tableBody.appendChild(row);
-        });
-      }
-
-      // 공격 유형별 TOP5 테이블 업데이트
-      function updateAttackTypeTable() {
-        const tableBody = document.getElementById("attack-type-log");
-        tableBody.innerHTML = ""; // 테이블 초기화
-
-        // 객체를 배열로 변환하고 건수 기준으로 정렬
-        const sortedTypes = Object.keys(attackTypeStats)
-          .map((type) => ({
-            name: type,
-            count: attackTypeStats[type].count,
-            trend: attackTypeStats[type].trend,
-          }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5); // TOP5만 선택
-
-        // 데이터 채우기
-        sortedTypes.forEach((type) => {
-          const row = document.createElement("tr");
-
-          // 트렌드 아이콘 결정
-          let trendIcon = "■";
-          let trendClass = "trend-same";
-
-          if (type.trend === "up") {
-            trendIcon = "▲";
-            trendClass = "trend-up";
-          } else if (type.trend === "down") {
-            trendIcon = "▼";
-            trendClass = "trend-down";
-          }
-
-          // 각 열에 데이터 추가
-          row.innerHTML = `
-                    <td data-full-text="${type.name}">${type.name}</td>
-                    <td><span class="${trendClass}">${trendIcon}</span></td>
-                    <td>${type.count.toLocaleString()}</td>
-                `;
-
-          tableBody.appendChild(row);
-        });
-      }
-
-      // 웹소켓으로부터 데이터를 받을 때 통계 업데이트 (기존 웹소켓 코드 확장)
-      const originalOnMessage = webSock.onmessage;
-      webSock.onmessage = function (e) {
-        // 기존 웹소켓 처리 로직 실행
-        if (originalOnMessage) {
-          originalOnMessage(e);
-        }
-
-        try {
-          const msg = JSON.parse(e.data);
-          if (msg.type === "Traffic") {
-            // 국가별 통계 업데이트
-            updateCountryStats(msg.country || "Unknown", msg.country_to_code);
-
-            // 공격 유형별 통계 업데이트
-            updateAttackTypeStats(msg.protocol || "Unknown");
-          }
-        } catch (err) {
-          console.log("Error processing message for statistics:", err);
-        }
-      };
-
-      window.addEventListener("load", function () {
-        updateCountryTable();
-        updateAttackTypeTable();
-        
-        // 애니메이션 원 생성
-        createFixedCircleEffect("svg1", "#FF1D25");
-        createFixedCircleEffect("svg2", "#B81FFF");
-        createFixedCircleEffect("svg3", "#FFB72D");
-      });
-    </script>
   </body>
 </html>
