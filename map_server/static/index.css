@@ -6,6 +6,7 @@ body {
   margin: 0;
   padding: 0;
   background: #221925;
+  /*background: url("images/map_bg.jpg");*/
   overflow: hidden;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
     Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
@@ -55,7 +56,7 @@ body {
 }
 
 .subtitle {
-  color: #ee0c5d;
+  color: #3281b9;
   /* 요청하신 색상 */
   font-size: 2rem;
   font-weight: 600;
@@ -245,8 +246,7 @@ body {
 #map {
   width: 100%;
   height: 100%;
-  background: #494949;
-  
+  background: #221925;
 }
 
 .leaflet-container {
@@ -254,9 +254,6 @@ body {
   border-radius: 15px;
 }
 
-.custom-map-image {
-  z-index: 10000000;
-}
 
 .circle {
   height: 18px;
@@ -333,7 +330,7 @@ td {
 
 th {
   background-color: rgba(251, 255, 0, 0.2);
-  color: rgba(0, 0, 0, 0.2)
+  color: rgba(0, 0, 0, 0.2);
   font-weight: 600;
   text-align: left;
   padding: 10px;

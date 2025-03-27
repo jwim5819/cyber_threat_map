@@ -58,6 +58,15 @@ L.tileLayer(tileUrl, {
 }).addTo(map);
 
 
+var imageUrl = 'static/images/worldmap-bg.png';
+var latLngBounds = L.latLngBounds([[-55, -170], [75, 210]]);
+
+var imageOverlay = L.imageOverlay(imageUrl, latLngBounds, {
+    opacity: 1,
+    interactive: true
+}).addTo(map);
+
+
 // 목적지 위경도좌표
 /* 
 var dstLatLng = new L.LatLng(window._env_.HD_LAT, window._env_.HD_LNG);

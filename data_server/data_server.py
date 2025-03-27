@@ -162,20 +162,14 @@ def merge_dicts(*args):
 
 
 def track_flags(super_dict, tracking_dict, key1, key2):
-    # 너무 길어지는 것 방지
-    if len(tracking_dict) >= 50:
-        return None
-
-    if key1 in super_dict:
-        if key2 in super_dict:
-            if key1 in tracking_dict:
-                return None
-            else:
-                tracking_dict[super_dict[key1]] = super_dict[key2]
-        else:
-            return None
-    else:
-        return None
+    if key1 in super_dict and key2 in super_dict:
+        if key1 not in tracking_dict:
+            # 50개 넘어가면 밀어내기로 제거
+            if len(tracking_dict) >= 50:
+                oldest_key = next(iter(tracking_dict))
+                tracking_dict.pop(oldest_key)
+            tracking_dict[super_dict[key1]] = super_dict[key2]
+    return tracking_dict
 
 
 def track_stats(super_dict, tracking_dict, key):
