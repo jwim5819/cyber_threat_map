@@ -7,14 +7,14 @@ let attackCounter = 0;
 
 // 지도 초기화 - 줌 컨트롤 및 드래그 기능 비활성화
 var map = L.map('map', {
-  center: [30.0, 12.0],
+  center: [23.0, 12.0],
   zoom: 2,
   minZoom: 2,
   maxZoom: 3,
   zoomControl: false,
-  dragging: true,
+  dragging: false,
   doubleClickZoom: false,
-  scrollWheelZoom: true,
+  scrollWheelZoom: false,
   touchZoom: false,
   boxZoom: false,
   keyboard: false,
@@ -34,7 +34,7 @@ var limitedBounds = L.latLngBounds(
   L.latLng(120, 180)
 );
 
-//map.setMaxBounds(worldBounds);
+// map.setMaxBounds(worldBounds);
 
 // 줌 변경 시 경계 업데이트
 map.on('zoomend', function () {
@@ -53,8 +53,8 @@ map.on('resize', function () {
 // 타일 레이어 추가
 const tileUrl = '/static/mapbox_tiles/{z}/{x}/{y}.png';
 L.tileLayer(tileUrl, {
-  tileSize: 512,
-  zoomOffset: -1
+  tileSize: 256,
+  zoomOffset: 0
 }).addTo(map);
 
 
