@@ -60,7 +60,7 @@ map.on("resize", function () {
 });
 
 // 타일 레이어 추가
-const tileUrl = "/static/mapbox_tiles_transparency_land/{z}/{x}/{y}.png";
+const tileUrl = "/static/images/mapbox_tiles_transparency_land/{z}/{x}/{y}.png";
 L.tileLayer(tileUrl, {
   tileSize: 256,
   zoomOffset: 0,
