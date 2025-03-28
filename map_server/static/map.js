@@ -8,8 +8,9 @@ let attackCounter = 0;
 let countryAttackStats = {};
 let attackTypeStats = {};
 
+
 // 지도 초기화 - 줌 컨트롤 및 드래그 기능 비활성화
-var map = L.map('map', {
+var map = L.map("map", {
   center: [23.0, 12.0],
   zoom: 2,
   minZoom: 2,
@@ -21,41 +22,48 @@ var map = L.map('map', {
   touchZoom: false,
   boxZoom: false,
   keyboard: false,
-  attributionControl: false  // 저작권 표시 컨트롤 비활성화
+  attributionControl: false, // 저작권 표시 컨트롤 비활성화
 });
 
+// 이미지 오버레이 코드
+/* 
+var imageUrl = "static/images/worldmap_2.png";
+var overlayLatLngBounds = L.latLngBounds([
+  [-70, -180],
+  [120, 180],
+]);
+var imageOverlay = L.imageOverlay(imageUrl, overlayLatLngBounds, {
+  opacity: 1,
+  interactive: true
+}).addTo(map);
+*/
+
 // 전 세계 경계 (줌 레벨 2에서는 제한 X)
-var worldBounds = L.latLngBounds(
-  L.latLng(45.0, 12.0), 
-  L.latLng(45.0, 12.0)
-);
+var worldBounds = L.latLngBounds(L.latLng(45.0, 12.0), L.latLng(45.0, 12.0));
 
 // 특정 줌 이상일 때 제한할 경계 (예: 줌 3 이상에서는 특정 지역만 이동 가능)
-var limitedBounds = L.latLngBounds(
-  L.latLng(-70, -180), 
-  L.latLng(120, 180)
-);
+var limitedBounds = L.latLngBounds(L.latLng(-70, -180), L.latLng(120, 180));
 
 // map.setMaxBounds(worldBounds);
 
 // 줌 변경 시 경계 업데이트
-map.on('zoomend', function () {
+map.on("zoomend", function () {
   if (map.getZoom() >= 3) {
-      map.setMaxBounds(limitedBounds);
+    map.setMaxBounds(limitedBounds);
   } else {
-      map.setMaxBounds(worldBounds); // 제한 해제
+    map.setMaxBounds(worldBounds); // 제한 해제
   }
 });
 
-map.on('resize', function () {
+map.on("resize", function () {
   map.invalidateSize();
 });
 
 // 타일 레이어 추가
-const tileUrl = '/static/mapbox_tiles_transparency_land/{z}/{x}/{y}.png';
+const tileUrl = "/static/mapbox_tiles_transparency_land/{z}/{x}/{y}.png";
 L.tileLayer(tileUrl, {
   tileSize: 256,
-  zoomOffset: 0
+  zoomOffset: 0,
 }).addTo(map);
 
 // SVG 추가
@@ -68,18 +76,35 @@ var svg = d3
 
 // SVG 위치 조정 함수
 function translateSVG() {
-  var viewBoxLeft = document.querySelector("svg.leaflet-zoom-animated").viewBox.animVal.x;
-  var viewBoxTop = document.querySelector("svg.leaflet-zoom-animated").viewBox.animVal.y;
+  var viewBoxLeft = document.querySelector("svg.leaflet-zoom-animated").viewBox
+    .animVal.x;
+  var viewBoxTop = document.querySelector("svg.leaflet-zoom-animated").viewBox
+    .animVal.y;
 
   svg.attr("width", window.innerWidth);
   svg.attr("height", window.innerHeight);
 
   svg.attr("viewBox", function () {
-    return "" + viewBoxLeft + " " + viewBoxTop + " " + window.innerWidth + " " + window.innerHeight;
+    return (
+      "" +
+      viewBoxLeft +
+      " " +
+      viewBoxTop +
+      " " +
+      window.innerWidth +
+      " " +
+      window.innerHeight
+    );
   });
 
   svg.attr("style", function () {
-    return "transform: translate3d(" + viewBoxLeft + "px, " + viewBoxTop + "px, 0px);";
+    return (
+      "transform: translate3d(" +
+      viewBoxLeft +
+      "px, " +
+      viewBoxTop +
+      "px, 0px);"
+    );
   });
 }
 
@@ -91,14 +116,17 @@ function update() {
 // 애니메이션 원 효과 생성 함수
 function createFixedCircleEffect(svgId, color) {
   const svg = document.getElementById(svgId);
-  
+
   // 기존 내용 제거
   while (svg.firstChild) {
     svg.removeChild(svg.firstChild);
   }
 
   // 배경 원
-  const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const bgCircle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
   bgCircle.setAttribute("cx", "40");
   bgCircle.setAttribute("cy", "40");
   bgCircle.setAttribute("r", "18");
@@ -106,9 +134,12 @@ function createFixedCircleEffect(svgId, color) {
   bgCircle.setAttribute("fill-opacity", "0.3");
   bgCircle.classList.add("bg-circle");
   svg.appendChild(bgCircle);
-  
+
   // 가운데 원
-  const inCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const inCircle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
   inCircle.setAttribute("cx", "40");
   inCircle.setAttribute("cy", "40");
   inCircle.setAttribute("r", "6");
@@ -116,27 +147,33 @@ function createFixedCircleEffect(svgId, color) {
   inCircle.setAttribute("fill-opacity", "0.6");
   inCircle.classList.add("inner-circle");
   svg.appendChild(inCircle);
-  
+
   // 애니메이션 원 추가
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
   circle.setAttribute("cx", "40");
   circle.setAttribute("cy", "40");
   circle.setAttribute("r", "1");
   circle.setAttribute("stroke", color);
   circle.setAttribute("stroke-opacity", "1");
   circle.classList.add("animation-circle");
-  
+
   svg.appendChild(circle);
-  
+
   function animateGrowing() {
-    circle.animate([
-      { r: "4", strokeOpacity: "1" },
-      { r: "18", strokeOpacity: "0" }
-    ], {
-      duration: 2000,
-      easing: "ease-out",
-      iterations: Infinity
-    });
+    circle.animate(
+      [
+        { r: "4", strokeOpacity: "1" },
+        { r: "18", strokeOpacity: "0" },
+      ],
+      {
+        duration: 2000,
+        easing: "ease-out",
+        iterations: Infinity,
+      }
+    );
   }
   animateGrowing();
 }
@@ -164,7 +201,8 @@ function calcMidpoint(x1, y1, x2, y2, bend) {
   var m1 = (x1 + x2) / 2;
   var m2 = (y1 + y2) / 2;
 
-  var min = 2.5, max = 7.5;
+  var min = 2.5,
+    max = 7.5;
   var arcIntensity = parseFloat((Math.random() * (max - min) + min).toFixed(2));
 
   if (bend === true) {
@@ -209,7 +247,11 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
   var bendArray = [true, false];
   var bend = bendArray[Math.floor(Math.random() * bendArray.length)];
 
-  var lineData = [srcPoint, calcMidpoint(fromX, fromY, toX, toY, bend), hqPoint];
+  var lineData = [
+    srcPoint,
+    calcMidpoint(fromX, fromY, toX, toY, bend),
+    hqPoint,
+  ];
   var lineFunction = d3.svg
     .line()
     .interpolate("basis")
@@ -251,7 +293,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
         .attr("r", 15)
         .style("opacity", 0)
         .remove();
-        
+
       // A->B 방향으로 선이 사라지는 애니메이션
       d3.select(this)
         .transition()
@@ -259,7 +301,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
         .attr("stroke-dashoffset", -length) // 음수값을 주면 반대 방향으로 대시 이동
         .style("opacity", 0.7)
         .remove();
-      
+
       // 나라 이름 마커 삭제
       if (countryMarker) {
         country_name.removeLayer(countryMarker);
@@ -297,26 +339,29 @@ function addCountryName(msg, srcLatLng) {
   // 기존 오버레이 삭제 (너무 많아지는 것 방지)
   var countryNameCount = country_name.getLayers().length;
   var countryNameArray = country_name.getLayers();
-  
+
   // 최대 50개의 나라명만 허용
   if (countryNameCount >= 50) {
     country_name.removeLayer(countryNameArray[0]);
   }
-  
+
   // 나라명 마커 추가
   var countryIcon = L.divIcon({
-    className: 'country-label',
-    html: '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 16px;">' + msg.country + '</div>',
+    className: "country-label",
+    html:
+      '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 16px;">' +
+      msg.country +
+      "</div>",
     iconSize: [100, 20],
-    iconAnchor: [75, 30]  // 마커 포인트의 정중앙 위에 위치하도록 조정 [width의 1/2, 높이]
+    iconAnchor: [75, 30], // 마커 포인트의 정중앙 위에 위치하도록 조정 [width의 1/2, 높이]
   });
-  
+
   // 나라명 마커 생성 및 추가
   var marker = L.marker(srcLatLng, {
     icon: countryIcon,
-    zIndexOffset: 1000  // 다른 요소들 위에 표시
+    zIndexOffset: 1000, // 다른 요소들 위에 표시
   }).addTo(country_name);
-  
+
   // 타임아웃 삭제: 선 애니메이션 종료 시 삭제할 예정
   return marker;
 }
@@ -326,7 +371,7 @@ function resizeContainer() {
   const wrapperContainer = document.getElementById("map-container-wrapper");
   const mapContainer = document.getElementById("map-container");
   let scaled = true;
-  
+
   document.body.classList.toggle("scaled", scaled);
   const wrapperContainerWidth = wrapperContainer.offsetWidth;
   const wrapperContainerHeight = wrapperContainer.offsetHeight;
@@ -505,13 +550,13 @@ function updateAttackTypeTable() {
 function initializeApp() {
   // 초기 리사이징 적용
   resizeContainer();
-  
+
   // 창크기변화 감지
   window.addEventListener("resize", resizeContainer);
-  
+
   // 전체화면 감지
   window.addEventListener("fullscreenchange", resizeContainer);
-  
+
   // 테이블 초기화
   updateCountryTable();
   updateAttackTypeTable();
@@ -527,8 +572,6 @@ function initializeApp() {
 function initializeCountryTable() {
   const tableBody = document.getElementById("country-attack-log");
   tableBody.innerHTML = ""; // 테이블 초기화
-
-  console.log("애미")
 
   // 5개의 빈 행 추가
   for (let i = 0; i < 5; i++) {
@@ -561,7 +604,6 @@ function initializeAttackTypeTable() {
   }
 }
 
-
 // 웹소켓 메시지 처리
 webSock.onmessage = function (e) {
   try {
@@ -579,8 +621,10 @@ webSock.onmessage = function (e) {
       handleTraffic(msg, srcPoint, hqPoint, countryMarker);
       // 어택카운트 갱신
       attackCounter++;
-      document.querySelector('.subtitle').textContent = `${attackCounter.toLocaleString()} ATTACKS ON THIS DAY`;
-      
+      document.querySelector(
+        ".subtitle"
+      ).textContent = `${attackCounter.toLocaleString()} ATTACKS ON THIS DAY`;
+
       // 국가별 통계 업데이트
       updateCountryStats(msg.country || "Unknown", msg.country_to_code);
 

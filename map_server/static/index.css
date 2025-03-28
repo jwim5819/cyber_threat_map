@@ -167,12 +167,12 @@ body {
 .sidebar-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0; 
+  border-spacing: 0;
   color: #fff;
   font-size: 0.8rem;
   table-layout: fixed;
   border-radius: 5px; /* 테이블 모서리 라운딩 처리 */
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 /* 사이드바 테이블 열 너비 조정 */
