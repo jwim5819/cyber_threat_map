@@ -113,7 +113,6 @@ function update() {
   translateSVG();
 }
 
-// 애니메이션 원 효과 생성 함수
 function createFixedCircleEffect(svgId, color) {
   const svg = document.getElementById(svgId);
 
@@ -122,24 +121,35 @@ function createFixedCircleEffect(svgId, color) {
     svg.removeChild(svg.firstChild);
   }
 
+  // SVG 필터 정의 (블러 효과 추가)
+  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+  const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+  filter.setAttribute("id", "blurFilter");
+  filter.setAttribute("x", "-20%");
+  filter.setAttribute("y", "-20%");
+  filter.setAttribute("width", "140%");
+  filter.setAttribute("height", "140%");
+
+  const feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+  feGaussianBlur.setAttribute("stdDeviation", "2"); // 블러 강도 조절
+
+  filter.appendChild(feGaussianBlur);
+  defs.appendChild(filter);
+  svg.appendChild(defs);
+
   // 배경 원
-  const bgCircle = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "circle"
-  );
+  const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   bgCircle.setAttribute("cx", "40");
   bgCircle.setAttribute("cy", "40");
   bgCircle.setAttribute("r", "18");
   bgCircle.setAttribute("fill", color);
   bgCircle.setAttribute("fill-opacity", "0.3");
+  bgCircle.setAttribute("filter", "url(#blurFilter)"); // 블러 필터 적용
   bgCircle.classList.add("bg-circle");
   svg.appendChild(bgCircle);
 
   // 가운데 원
-  const inCircle = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "circle"
-  );
+  const inCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   inCircle.setAttribute("cx", "40");
   inCircle.setAttribute("cy", "40");
   inCircle.setAttribute("r", "6");
@@ -149,10 +159,7 @@ function createFixedCircleEffect(svgId, color) {
   svg.appendChild(inCircle);
 
   // 애니메이션 원 추가
-  const circle = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "circle"
-  );
+  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   circle.setAttribute("cx", "40");
   circle.setAttribute("cy", "40");
   circle.setAttribute("r", "1");
@@ -214,6 +221,33 @@ function calcMidpoint(x1, y1, x2, y2, bend) {
   }
 
   return { x: a, y: b };
+}
+
+// 레이어를 서서히 페이드 아웃시키는 함수 추가
+function fadeOutAndRemoveLayer(layerGroup, layer, duration = 1000) {
+  if (!layer) return;
+  
+  // 마커 레이어인 경우
+  if (layer._icon) {
+    // 마커 아이콘에 트랜지션 스타일 적용
+    layer._icon.style.transition = `opacity ${duration}ms ease-out`;
+    layer._icon.style.opacity = '0';
+    
+    // 마커 그림자가 있는 경우 페이드 아웃
+    if (layer._shadow) {
+      layer._shadow.style.transition = `opacity ${duration}ms ease-out`;
+      layer._shadow.style.opacity = '0';
+    }
+    
+    setTimeout(() => {
+      layerGroup.removeLayer(layer);
+    }, duration);
+  } 
+  // 레이어가 있지만 다른 타입인 경우
+  else {
+    // DOM 요소에 접근할 수 없는 경우 바로 제거
+    layerGroup.removeLayer(layer);
+  }
 }
 
 // 원 효과 함수
@@ -302,9 +336,9 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
         .style("opacity", 0.7)
         .remove();
 
-      // 나라 이름 마커 삭제
+      // 나라 이름 마커를 서서히 사라지게 함 (수정된 부분)
       if (countryMarker) {
-        country_name.removeLayer(countryMarker);
+        fadeOutAndRemoveLayer(country_name, countryMarker, 1000);
       }
     });
 }
