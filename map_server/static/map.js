@@ -8,6 +8,9 @@ let attackCounter = 0;
 let countryAttackStats = {};
 let attackTypeStats = {};
 
+// 애니메이션 상태 변수 추가
+let animationPaused = false;
+let pendingAnimations = [];
 
 // 지도 초기화 - 줌 컨트롤 및 드래그 기능 비활성화
 var map = L.map("map", {
@@ -26,17 +29,17 @@ var map = L.map("map", {
 });
 
 // 이미지 오버레이 코드
-/* 
-var imageUrl = "static/images/worldmap_2.png";
+/* */
+var imageUrl = "static/images/worldmap_1.png";
 var overlayLatLngBounds = L.latLngBounds([
-  [-70, -180],
-  [120, 180],
+  [-56, -170],
+  [76, 210],
 ]);
 var imageOverlay = L.imageOverlay(imageUrl, overlayLatLngBounds, {
   opacity: 1,
   interactive: true
 }).addTo(map);
-*/
+
 
 // 전 세계 경계 (줌 레벨 2에서는 제한 X)
 var worldBounds = L.latLngBounds(L.latLng(45.0, 12.0), L.latLng(45.0, 12.0));
@@ -60,7 +63,7 @@ map.on("resize", function () {
 });
 
 // 타일 레이어 추가
-const tileUrl = "/static/images/mapbox_tiles_transparency_land/{z}/{x}/{y}.png";
+const tileUrl = "/static/images/mapbox_tiles_transparency/{z}/{x}/{y}.png";
 L.tileLayer(tileUrl, {
   tileSize: 256,
   zoomOffset: 0,
@@ -252,6 +255,9 @@ function fadeOutAndRemoveLayer(layerGroup, layer, duration = 1000) {
 
 // 원 효과 함수
 function handleParticle(msg, srcPoint) {
+  // 애니메이션 일시 중지 상태일 때는 함수 실행하지 않음
+  if (animationPaused) return;
+  
   var i = 0;
   var x = srcPoint["x"];
   var y = srcPoint["y"];
@@ -274,6 +280,9 @@ function handleParticle(msg, srcPoint) {
 
 // handleTraffic 함수를 수정하여 선이 A->B 방향으로 사라지는 애니메이션 추가
 function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
+  // 애니메이션 일시 중지 상태일 때는 함수 실행하지 않음
+  if (animationPaused) return;
+  
   var fromX = srcPoint["x"];
   var fromY = srcPoint["y"];
   var toX = hqPoint["x"];
@@ -349,6 +358,9 @@ map.addLayer(circles);
 
 // 원 추가 함수
 function addCircle(msg, srcLatLng) {
+  // 애니메이션 일시 중지 상태일 때는 함수 실행하지 않음
+  if (animationPaused) return;
+  
   circleCount = circles.getLayers().length;
   circleArray = circles.getLayers();
 
@@ -370,6 +382,9 @@ map.addLayer(country_name);
 
 // 나라명 오버레이 함수 - 수정됨
 function addCountryName(msg, srcLatLng) {
+  // 애니메이션 일시 중지 상태일 때는 null 반환
+  if (animationPaused) return null;
+  
   // 기존 오버레이 삭제 (너무 많아지는 것 방지)
   var countryNameCount = country_name.getLayers().length;
   var countryNameArray = country_name.getLayers();
@@ -580,6 +595,44 @@ function updateAttackTypeTable() {
   }
 }
 
+// 페이지 가시성 변경 핸들러
+function handleVisibilityChange() {
+  if (document.hidden) {
+    // 페이지가 숨겨진 경우 애니메이션 일시 중지
+    pauseAnimations();
+  } else {
+    // 페이지가 다시 보이는 경우 애니메이션 재개
+    resumeAnimations();
+  }
+}
+
+// 애니메이션 일시 중지 함수
+function pauseAnimations() {
+  animationPaused = true;
+  console.log("Animation paused due to page visibility change");
+}
+
+// 애니메이션 재개 함수
+function resumeAnimations() {
+  // 기존 애니메이션 요소 정리
+  clearExistingAnimations();
+  
+  // 애니메이션 재개
+  animationPaused = false;
+  console.log("Animation resumed");
+}
+
+// 기존 애니메이션 요소 정리 함수
+function clearExistingAnimations() {
+  // SVG 애니메이션 요소 제거 (원, 선 등)
+  svg.selectAll("circle").interrupt().remove();
+  svg.selectAll("path").interrupt().remove();
+  
+  // 마커와 원도 제거 (필요에 따라 주석 처리 가능)
+  country_name.clearLayers();
+  circles.clearLayers();
+}
+
 // 초기화 및 이벤트 핸들러
 function initializeApp() {
   // 초기 리사이징 적용
@@ -590,6 +643,9 @@ function initializeApp() {
 
   // 전체화면 감지
   window.addEventListener("fullscreenchange", resizeContainer);
+
+  // 페이지 가시성 변경 감지 이벤트 리스너 추가
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 
   // 테이블 초기화
   updateCountryTable();
@@ -643,17 +699,7 @@ webSock.onmessage = function (e) {
   try {
     var msg = JSON.parse(e.data);
     if (msg.type === "Traffic") {
-      var dstLatLng = new L.LatLng(msg.dst_lat, msg.dst_long);
-      var srcLatLng = new L.LatLng(msg.src_lat, msg.src_long);
-      var hqPoint = map.latLngToLayerPoint(dstLatLng);
-      var srcPoint = map.latLngToLayerPoint(srcLatLng);
-      addCircle(msg, srcLatLng);
-      // 수정된 부분: 반환값인 marker 저장
-      var countryMarker = addCountryName(msg, srcLatLng);
-      handleParticle(msg, srcPoint);
-      // countryMarker를 함께 넘김
-      handleTraffic(msg, srcPoint, hqPoint, countryMarker);
-      // 어택카운트 갱신
+      // 항상 통계는 업데이트 
       attackCounter++;
       document.querySelector(
         ".subtitle"
@@ -664,6 +710,18 @@ webSock.onmessage = function (e) {
 
       // 공격 유형별 통계 업데이트
       updateAttackTypeStats(msg.protocol || "Unknown");
+      
+      // 페이지가 보이는 상태일 때만 애니메이션 표시
+      if (!animationPaused) {
+        var dstLatLng = new L.LatLng(msg.dst_lat, msg.dst_long);
+        var srcLatLng = new L.LatLng(msg.src_lat, msg.src_long);
+        var hqPoint = map.latLngToLayerPoint(dstLatLng);
+        var srcPoint = map.latLngToLayerPoint(srcLatLng);
+        addCircle(msg, srcLatLng);
+        var countryMarker = addCountryName(msg, srcLatLng);
+        handleParticle(msg, srcPoint);
+        handleTraffic(msg, srcPoint, hqPoint, countryMarker);
+      }
     }
   } catch (err) {
     console.log(err);
