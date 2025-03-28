@@ -179,7 +179,7 @@ function createFixedCircleEffect(svgId, color) {
         { r: "18", strokeOpacity: "0" },
       ],
       {
-        duration: 2000,
+        duration: 1500,
         easing: "ease-out",
         iterations: Infinity,
       }
@@ -273,7 +273,7 @@ function handleParticle(msg, srcPoint) {
     .transition()
     .duration(4000)
     .ease(Math.sqrt)
-    .attr("r", 35)
+    .attr("r", 25)
     .style("stroke-opacity", 1e-6)
     .remove();
 }
@@ -319,7 +319,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     .attr("stroke-dasharray", length + " " + length)
     .attr("stroke-dashoffset", length)
     .transition()
-    .duration(1700)
+    .duration(1800)
     .ease("ease-in")
     .attr("stroke-dashoffset", 0)
     .each("end", function () {
@@ -329,10 +329,10 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
         .append("circle")
         .attr("cx", endPoint.x)
         .attr("cy", endPoint.y)
-        .attr("r", 6)
+        .attr("r", 1)
         .attr("fill", msg.color)
         .transition()
-        .duration(1000)
+        .duration(2000)
         .attr("r", 15)
         .style("opacity", 0)
         .remove();
@@ -340,7 +340,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
       // A->B 방향으로 선이 사라지는 애니메이션
       d3.select(this)
         .transition()
-        .duration(1700)
+        .duration(1800)
         .attr("stroke-dashoffset", -length) // 음수값을 주면 반대 방향으로 대시 이동
         .style("opacity", 0.7)
         .remove();
