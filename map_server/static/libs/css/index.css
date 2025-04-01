@@ -5,7 +5,8 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
-  background: url("../../images/background.png");
+  /* background: url("../../images/background_2.png"); */
+  background: #000000;
   background-size: cover;
   overflow: hidden;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
@@ -98,23 +99,25 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: rgb(0, 0, 0);
 }
 
 .map-container {
   width: 1030px;
-  height: 560px;
+  height: 600px;
   position: absolute;
   top: 50%;
   left: 50%;
   transform-origin: center;
   transform: translate(-50%, -50%);
   overflow: hidden;
+  background: rgb(0, 0, 0);
 }
 
 #map {
   width: 100%;
   height: 100%;
-  background: #22192500;
+  background: rgb(0, 0, 0);
 }
 
 .leaflet-container {

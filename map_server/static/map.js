@@ -30,16 +30,15 @@ var map = L.map("map", {
 
 // 이미지 오버레이 코드
 /* */
-var imageUrl = "static/images/worldmap_1.png";
+var imageUrl = "static/images/worldmap_2.png";
 var overlayLatLngBounds = L.latLngBounds([
-  [-56, -170],
-  [76, 210],
+  [-60, -208],
+  [83, 228],
 ]);
 var imageOverlay = L.imageOverlay(imageUrl, overlayLatLngBounds, {
   opacity: 1,
-  interactive: true
+  interactive: true,
 }).addTo(map);
-
 
 // 전 세계 경계 (줌 레벨 2에서는 제한 X)
 var worldBounds = L.latLngBounds(L.latLng(45.0, 12.0), L.latLng(45.0, 12.0));
@@ -63,7 +62,7 @@ map.on("resize", function () {
 });
 
 // 타일 레이어 추가
-const tileUrl = "/static/images/mapbox_tiles_transparency/{z}/{x}/{y}.png";
+const tileUrl = "/static/images/mapbox_tiles_blue/{z}/{x}/{y}.png";
 L.tileLayer(tileUrl, {
   tileSize: 256,
   zoomOffset: 0,
@@ -126,14 +125,20 @@ function createFixedCircleEffect(svgId, color) {
 
   // SVG 필터 정의 (블러 효과 추가)
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-  const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+  const filter = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "filter"
+  );
   filter.setAttribute("id", "blurFilter");
   filter.setAttribute("x", "-20%");
   filter.setAttribute("y", "-20%");
   filter.setAttribute("width", "140%");
   filter.setAttribute("height", "140%");
 
-  const feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+  const feGaussianBlur = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "feGaussianBlur"
+  );
   feGaussianBlur.setAttribute("stdDeviation", "2"); // 블러 강도 조절
 
   filter.appendChild(feGaussianBlur);
@@ -141,7 +146,10 @@ function createFixedCircleEffect(svgId, color) {
   svg.appendChild(defs);
 
   // 배경 원
-  const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const bgCircle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
   bgCircle.setAttribute("cx", "40");
   bgCircle.setAttribute("cy", "40");
   bgCircle.setAttribute("r", "18");
@@ -152,7 +160,10 @@ function createFixedCircleEffect(svgId, color) {
   svg.appendChild(bgCircle);
 
   // 가운데 원
-  const inCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const inCircle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
   inCircle.setAttribute("cx", "40");
   inCircle.setAttribute("cy", "40");
   inCircle.setAttribute("r", "6");
@@ -162,7 +173,10 @@ function createFixedCircleEffect(svgId, color) {
   svg.appendChild(inCircle);
 
   // 애니메이션 원 추가
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
   circle.setAttribute("cx", "40");
   circle.setAttribute("cy", "40");
   circle.setAttribute("r", "1");
@@ -229,23 +243,23 @@ function calcMidpoint(x1, y1, x2, y2, bend) {
 // 레이어를 서서히 페이드 아웃시키는 함수 추가
 function fadeOutAndRemoveLayer(layerGroup, layer, duration = 1000) {
   if (!layer) return;
-  
+
   // 마커 레이어인 경우
   if (layer._icon) {
     // 마커 아이콘에 트랜지션 스타일 적용
     layer._icon.style.transition = `opacity ${duration}ms ease-out`;
-    layer._icon.style.opacity = '0';
-    
+    layer._icon.style.opacity = "0";
+
     // 마커 그림자가 있는 경우 페이드 아웃
     if (layer._shadow) {
       layer._shadow.style.transition = `opacity ${duration}ms ease-out`;
-      layer._shadow.style.opacity = '0';
+      layer._shadow.style.opacity = "0";
     }
-    
+
     setTimeout(() => {
       layerGroup.removeLayer(layer);
     }, duration);
-  } 
+  }
   // 레이어가 있지만 다른 타입인 경우
   else {
     // DOM 요소에 접근할 수 없는 경우 바로 제거
@@ -257,7 +271,7 @@ function fadeOutAndRemoveLayer(layerGroup, layer, duration = 1000) {
 function handleParticle(msg, srcPoint) {
   // 애니메이션 일시 중지 상태일 때는 함수 실행하지 않음
   if (animationPaused) return;
-  
+
   var i = 0;
   var x = srcPoint["x"];
   var y = srcPoint["y"];
@@ -282,7 +296,7 @@ function handleParticle(msg, srcPoint) {
 function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
   // 애니메이션 일시 중지 상태일 때는 함수 실행하지 않음
   if (animationPaused) return;
-  
+
   var fromX = srcPoint["x"];
   var fromY = srcPoint["y"];
   var toX = hqPoint["x"];
@@ -360,7 +374,7 @@ map.addLayer(circles);
 function addCircle(msg, srcLatLng) {
   // 애니메이션 일시 중지 상태일 때는 함수 실행하지 않음
   if (animationPaused) return;
-  
+
   circleCount = circles.getLayers().length;
   circleArray = circles.getLayers();
 
@@ -384,7 +398,7 @@ map.addLayer(country_name);
 function addCountryName(msg, srcLatLng) {
   // 애니메이션 일시 중지 상태일 때는 null 반환
   if (animationPaused) return null;
-  
+
   // 기존 오버레이 삭제 (너무 많아지는 것 방지)
   var countryNameCount = country_name.getLayers().length;
   var countryNameArray = country_name.getLayers();
@@ -616,7 +630,7 @@ function pauseAnimations() {
 function resumeAnimations() {
   // 기존 애니메이션 요소 정리
   clearExistingAnimations();
-  
+
   // 애니메이션 재개
   animationPaused = false;
   console.log("Animation resumed");
@@ -627,7 +641,7 @@ function clearExistingAnimations() {
   // SVG 애니메이션 요소 제거 (원, 선 등)
   svg.selectAll("circle").interrupt().remove();
   svg.selectAll("path").interrupt().remove();
-  
+
   // 마커와 원도 제거 (필요에 따라 주석 처리 가능)
   country_name.clearLayers();
   circles.clearLayers();
@@ -699,7 +713,7 @@ webSock.onmessage = function (e) {
   try {
     var msg = JSON.parse(e.data);
     if (msg.type === "Traffic") {
-      // 항상 통계는 업데이트 
+      // 항상 통계는 업데이트
       attackCounter++;
       document.querySelector(
         ".subtitle"
@@ -710,7 +724,7 @@ webSock.onmessage = function (e) {
 
       // 공격 유형별 통계 업데이트
       updateAttackTypeStats(msg.protocol || "Unknown");
-      
+
       // 페이지가 보이는 상태일 때만 애니메이션 표시
       if (!animationPaused) {
         var dstLatLng = new L.LatLng(msg.dst_lat, msg.dst_long);
