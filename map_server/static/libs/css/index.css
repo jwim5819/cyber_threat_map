@@ -82,7 +82,7 @@ body {
 }
 
 .subtitle {
-  color: #FCB00E; /* 파란색 강조 */
+  color: #fcb00e; /* 파란색 강조 */
   font-size: 2rem;
   font-weight: 600;
   margin-top: 8px;
@@ -130,17 +130,17 @@ body {
   transform: translate(-50%, -50%);
   overflow: hidden;
   background: rgb(0, 0, 0);
+  mix-blend-mode: plus-lighter; /* 경계선 생성 방지... */
+}
+
+.leaflet-container img.leaflet-tile {
+  mix-blend-mode: plus-lighter; /* 경계선 생성 방지... */
 }
 
 #map {
   width: 100%;
   height: 100%;
   background: rgb(0, 0, 0);
-}
-
-.leaflet-container {
-  background: transparent;
-  border-radius: 15px;
 }
 
 /* 스케일링 적용 */
@@ -546,11 +546,7 @@ td:nth-child(8) {
   }
 }
 
-
-
-
-
-/* ======================================================== */
+/* ============================================================================================ */
 
 /* 사이드바 내부 테이블 컨테이너 - 제목과 테이블 영역 분리 */
 .sidebar-table-container {
@@ -598,12 +594,12 @@ td:nth-child(8) {
 
 /* 테이블 헤더 스타일 - 투명 배경 */
 .sidebar-table th {
-  background-color: #fcb10e4f;
+  background-color: #fcb10e38;
   color: #ffffff;
   font-weight: 600;
   text-align: center;
-  padding: 8px 5px;
-  font-size: 0.95rem;
+  padding: 6px 5px;
+  font-size: 1rem;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -617,7 +613,7 @@ td:nth-child(8) {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s;
 }
 
 /* 호버 효과 */
@@ -628,30 +624,4 @@ td:nth-child(8) {
 /* 짝수 행에 약간의 배경색 */
 .sidebar-table tr:nth-child(even) td {
   background-color: rgba(255, 255, 255, 0.03);
-}
-
-/* 국기 이미지 스타일 */
-.country-flag {
-  width: 18px;
-  height: 13px;
-  vertical-align: middle;
-  margin-right: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-/* 공격 추이 화살표 스타일 */
-.trend-up {
-  color: #ff4d6d;
-  font-weight: bold;
-}
-
-.trend-down {
-  color: #4dff88;
-  font-weight: bold;
-}
-
-.trend-same {
-  color: #ffdd4d;
-  font-weight: bold;
 }

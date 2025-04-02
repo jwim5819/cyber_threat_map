@@ -17,7 +17,7 @@ var map = L.map("map", {
   center: [23.0, 12.0],
   zoom: 2,
   minZoom: 2,
-  maxZoom: 3,
+  maxZoom: 2,
   zoomControl: false,
   dragging: false,
   doubleClickZoom: false,
@@ -25,21 +25,19 @@ var map = L.map("map", {
   touchZoom: false,
   boxZoom: false,
   keyboard: false,
-  attributionControl: false, // 저작권 표시 컨트롤 비활성화
+  attributionControl: false
 });
 
 // 이미지 오버레이 코드
-/* */
 var imageUrl = "static/images/map/worldmap_2.png";
 var overlayLatLngBounds = L.latLngBounds([
-  [-60, -208],
-  [83, 228],
+  [-65, -169],
+  [78, 193],
 ]);
 var imageOverlay = L.imageOverlay(imageUrl, overlayLatLngBounds, {
   opacity: 1,
   interactive: true,
 }).addTo(map);
-
 
 // 전 세계 경계 (줌 레벨 2에서는 제한 X)
 var worldBounds = L.latLngBounds(L.latLng(45.0, 12.0), L.latLng(45.0, 12.0));
@@ -63,7 +61,7 @@ map.on("resize", function () {
 });
 
 // 타일 레이어 추가
-const tileUrl = "/static/images/map/mapbox_tiles_blue/{z}/{x}/{y}.png";
+const tileUrl = "/static/images/map/mapbox_tiles/{z}/{x}/{y}.png";
 L.tileLayer(tileUrl, {
   tileSize: 256,
   zoomOffset: 0,
@@ -169,7 +167,8 @@ function createFixedCircleEffect(svgId, color) {
   inCircle.setAttribute("cy", "40");
   inCircle.setAttribute("r", "12");
   inCircle.setAttribute("fill", color);
-  inCircle.setAttribute("fill-opacity", "0.6");
+  inCircle.setAttribute("fill-opacity", "0.5");
+  inCircle.setAttribute("filter", "url(#blurFilter)"); // 블러 필터 적용
   inCircle.classList.add("inner-circle");
   svg.appendChild(inCircle);
 
@@ -190,7 +189,7 @@ function createFixedCircleEffect(svgId, color) {
   function animateGrowing() {
     circle.animate(
       [
-        { r: "4", strokeOpacity: "1" },
+        { r: "6", strokeOpacity: "1" },
         { r: "30", strokeOpacity: "0" },
       ],
       {
