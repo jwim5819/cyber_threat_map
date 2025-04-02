@@ -10,7 +10,7 @@
     <script src="static/libs/js/mapbox.js"></script>
     <script src="static/libs/js/proj4.js"></script>
     <script src="static/libs/js/proj4leaflet.min.js"></script>
-  
+
     <!-- 폰트 추가 - Pretendard 
     <link
       rel="stylesheet"
@@ -20,10 +20,7 @@
     -->
 
     <!-- CSS -->
-    <link
-      href="static/libs/css/mapbox.css"
-      rel="stylesheet"
-    />
+    <link href="static/libs/css/mapbox.css" rel="stylesheet" />
     <link rel="stylesheet" href="static/libs/css/index.css" />
   </head>
 
@@ -33,6 +30,10 @@
       <div class="title-container">
         <h1 class="title">LIVE CYBER THREAT MAP</h1>
         <p class="subtitle">ATTACKS ON THIS DAY</p>
+      </div>
+
+      <div class="logo-container">
+        <img src="static/images/logo/KB_logo.png" />
       </div>
 
       <!-- 메인 콘텐츠 래퍼 -->
@@ -49,35 +50,39 @@
             <!-- 공격 국가 TOP5 테이블 -->
             <div class="sidebar-table-container">
               <h3 class="sidebar-table-title">공격 국가 TOP5</h3>
-              <table class="sidebar-table">
-                <thead>
-                  <tr>
-                    <th>국가</th>
-                    <th>공격추이</th>
-                    <th>건수</th>
-                  </tr>
-                </thead>
-                <tbody id="country-attack-log">
-                  <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
-                </tbody>
-              </table>
+              <div class="table-wrapper">
+                <table class="sidebar-table">
+                  <thead>
+                    <tr>
+                      <th>국가</th>
+                      <th>공격추이</th>
+                      <th>건수</th>
+                    </tr>
+                  </thead>
+                  <tbody id="country-attack-log">
+                    <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <!-- 공격 유형 TOP5 테이블 -->
             <div class="sidebar-table-container">
               <h3 class="sidebar-table-title">공격 유형 TOP5</h3>
-              <table class="sidebar-table">
-                <thead>
-                  <tr>
-                    <th>공격유형</th>
-                    <th>공격추이</th>
-                    <th>건수</th>
-                  </tr>
-                </thead>
-                <tbody id="attack-type-log">
-                  <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
-                </tbody>
-              </table>
+              <div class="table-wrapper">
+                <table class="sidebar-table">
+                  <thead>
+                    <tr>
+                      <th>공격유형</th>
+                      <th>공격추이</th>
+                      <th>건수</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attack-type-log">
+                    <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
           <!-- 공격유형 아이콘 컨테이너 -->

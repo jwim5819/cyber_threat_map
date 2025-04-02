@@ -82,7 +82,7 @@ body {
 }
 
 .subtitle {
-  color: #3281b9; /* 파란색 강조 */
+  color: #FCB00E; /* 파란색 강조 */
   font-size: 2rem;
   font-weight: 600;
   margin-top: 8px;
@@ -91,6 +91,24 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* ===== 로고 컨테이너 ===== */
+.logo-container {
+  position: absolute;
+  left: 50px;
+  top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 300px;
+  height: 60px;
+}
+
+/* 로고 이미지에 적용할 스타일 */
+.logo-container img {
+  max-width: 100%; /* 이미지 최대 너비를 컨테이너의 100%로 제한 */
+  max-height: 100%; /* 이미지 최대 높이를 컨테이너의 100%로 제한 */
+  object-fit: contain; /* 비율을 유지하면서 컨테이너에 맞춤 */
+}
 /* ===== 지도 컨테이너 ===== */
 .map-container-wrapper {
   width: 100%;
@@ -148,10 +166,10 @@ body {
 
 /* 사이드바 내부 테이블 컨테이너 */
 .sidebar-table-container {
-  background-color: rgba(34, 25, 37, 0);
+  background-color: rgba(163, 0, 218, 0);
   border-radius: 10px;
   padding: 1px;
-  margin-bottom: 1px;
+  margin-bottom: 40px;
   height: calc(50% - 10px);
   overflow: auto; /* 오버플로우를 auto로 설정 */
   display: flex;
@@ -209,14 +227,14 @@ body {
 /* 사이드바 테이블 셀 스타일 */
 .sidebar-table td {
   padding: 5px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.534);
   overflow: hidden;
   text-overflow: ellipsis;
   height: 16px; /* 최소 높이 설정 */
 }
 
 .sidebar-table th {
-  background-color: rgba(50, 96, 117, 0.623);
+  background-color: #3281b948; /* 파란색 강조 */
   color: #ffffff;
   font-weight: 600;
   text-align: center;
@@ -259,7 +277,7 @@ body {
   position: absolute;
   bottom: 30px;
   width: 50%;
-  left: 32%;
+  /* left: 32%; */
 }
 
 .attack-type {
@@ -276,7 +294,7 @@ body {
 
 .attack-type-label {
   text-align: center;
-  font-size: 22px;
+  font-size: 28px;
   margin-top: 0px;
   color: white;
 }
@@ -526,4 +544,114 @@ td:nth-child(8) {
     height: 9px;
     margin-right: 2px;
   }
+}
+
+
+
+
+
+/* ======================================================== */
+
+/* 사이드바 내부 테이블 컨테이너 - 제목과 테이블 영역 분리 */
+.sidebar-table-container {
+  background-color: transparent; /* 배경색 제거 */
+  border-radius: 12px;
+  padding: 0px;
+  margin-bottom: 30px;
+  height: calc(50% - 20px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* 테이블 제목 - 흰색으로 유지 */
+.sidebar-table-title {
+  color: #ffffff; /* 흰색으로 변경 */
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+}
+
+/* 테이블 자체를 감싸는 새로운 컨테이너 */
+.table-wrapper {
+  background-color: rgba(0, 0, 0, 0.4); /* 테이블 영역만 반투명 배경 */
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(218, 179, 4, 0.137); /* 미세한 테두리 */
+}
+
+.sidebar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #ffffff;
+  font-size: 0.85rem;
+  table-layout: fixed;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 테이블 헤더 스타일 - 투명 배경 */
+.sidebar-table th {
+  background-color: #fcb10e4f;
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 5px;
+  font-size: 0.95rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 테이블 셀 스타일 */
+.sidebar-table td {
+  padding: 7px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s;
+}
+
+/* 호버 효과 */
+.sidebar-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 짝수 행에 약간의 배경색 */
+.sidebar-table tr:nth-child(even) td {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* 국기 이미지 스타일 */
+.country-flag {
+  width: 18px;
+  height: 13px;
+  vertical-align: middle;
+  margin-right: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+/* 공격 추이 화살표 스타일 */
+.trend-up {
+  color: #ff4d6d;
+  font-weight: bold;
+}
+
+.trend-down {
+  color: #4dff88;
+  font-weight: bold;
+}
+
+.trend-same {
+  color: #ffdd4d;
+  font-weight: bold;
 }

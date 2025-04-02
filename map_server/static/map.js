@@ -30,7 +30,7 @@ var map = L.map("map", {
 
 // 이미지 오버레이 코드
 /* */
-var imageUrl = "static/images/worldmap_2.png";
+var imageUrl = "static/images/map/worldmap_2.png";
 var overlayLatLngBounds = L.latLngBounds([
   [-60, -208],
   [83, 228],
@@ -39,6 +39,7 @@ var imageOverlay = L.imageOverlay(imageUrl, overlayLatLngBounds, {
   opacity: 1,
   interactive: true,
 }).addTo(map);
+
 
 // 전 세계 경계 (줌 레벨 2에서는 제한 X)
 var worldBounds = L.latLngBounds(L.latLng(45.0, 12.0), L.latLng(45.0, 12.0));
@@ -62,7 +63,7 @@ map.on("resize", function () {
 });
 
 // 타일 레이어 추가
-const tileUrl = "/static/images/mapbox_tiles_blue/{z}/{x}/{y}.png";
+const tileUrl = "/static/images/map/mapbox_tiles_blue/{z}/{x}/{y}.png";
 L.tileLayer(tileUrl, {
   tileSize: 256,
   zoomOffset: 0,
@@ -152,7 +153,7 @@ function createFixedCircleEffect(svgId, color) {
   );
   bgCircle.setAttribute("cx", "40");
   bgCircle.setAttribute("cy", "40");
-  bgCircle.setAttribute("r", "18");
+  bgCircle.setAttribute("r", "30");
   bgCircle.setAttribute("fill", color);
   bgCircle.setAttribute("fill-opacity", "0.3");
   bgCircle.setAttribute("filter", "url(#blurFilter)"); // 블러 필터 적용
@@ -166,7 +167,7 @@ function createFixedCircleEffect(svgId, color) {
   );
   inCircle.setAttribute("cx", "40");
   inCircle.setAttribute("cy", "40");
-  inCircle.setAttribute("r", "6");
+  inCircle.setAttribute("r", "12");
   inCircle.setAttribute("fill", color);
   inCircle.setAttribute("fill-opacity", "0.6");
   inCircle.classList.add("inner-circle");
@@ -190,7 +191,7 @@ function createFixedCircleEffect(svgId, color) {
     circle.animate(
       [
         { r: "4", strokeOpacity: "1" },
-        { r: "18", strokeOpacity: "0" },
+        { r: "30", strokeOpacity: "0" },
       ],
       {
         duration: 1500,
