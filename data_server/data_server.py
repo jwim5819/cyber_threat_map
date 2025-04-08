@@ -3,13 +3,11 @@ import maxminddb
 import redis
 import io
 import os
-import logging
 
 from const import META, PORTMAP
 from sys import exit
 from dotenv import load_dotenv
-from time import gmtime, localtime, sleep, strftime
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from time import localtime, sleep, strftime
 
 redis_instance = None
 syslog_path = "/var/log/syslog"
