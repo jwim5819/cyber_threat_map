@@ -42,8 +42,8 @@ class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(request):
         request.render("index.html",
-                       HOST=os.getenv("WEB_SERVER_HOST"),
-                       PORT=os.getenv("DOCKER_PORT"))
+                       HOST=os.getenv("HOST_IP"),
+                       PORT=os.getenv("HOST_PORT"))
 
 
 class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
@@ -277,7 +277,7 @@ def main():
     # Create and start app listening on port 8888
     try:
         app = tornado.web.Application(handlers, **settings)
-        app.listen(os.getenv("WEB_SERVER_PORT"))
+        app.listen(os.getenv("CONTAINER_PORT"))
         print("[*] Waiting on browser connections...")
         tornado.autoreload.start()
         tornado.autoreload.watch('static/map.js')

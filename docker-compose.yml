@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/src
     ports:
-      - "8080:8888"
+      - "8081:8888"
     restart: always
     depends_on:
       - redis-server

@@ -79,16 +79,6 @@ $RECYCLE.BIN/
 # Misc.
 ############################
 
-/myenv
-.env
-*#
-ssl
-.idea
-nbproject
-metatrader
-config.yaml
-*.pyc
-
 ############################
 # Node.js
 ############################
