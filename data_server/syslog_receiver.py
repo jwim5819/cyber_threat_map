@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from scapy.all import sniff, IP, TCP, Raw
+from scapy.all import sniff, IP, UDP, Raw
 from dotenv import load_dotenv
 
 # .env 로딩
@@ -14,12 +14,12 @@ class SyslogMonitor:
         self.print_log = print_log
         
     def start_monitoring(self):
-        filter_rule = f"tcp port {self.source_port} and src host {self.source_ip}"
+        filter_rule = f"udp port {self.source_port} and src host {self.source_ip}"
         sniff(filter=filter_rule, prn=self._packet_handler, store=0)
         
     def _packet_handler(self, packet):
-        if IP in packet and TCP in packet:
-            if packet[TCP].dport == self.source_port or packet[TCP].sport == self.source_port:
+        if IP in packet and UDP in packet:
+            if packet[UDP].dport == self.source_port or packet[UDP].sport == self.source_port:
                 if Raw in packet:
                     self._parse_payload(packet[Raw].load)
     
@@ -35,7 +35,7 @@ class SyslogMonitor:
             if self.print_log:
                 print(e)
             pass
-        
+
     def _process_log_entry(self, entry):
         match = re.match(r'<(\d+)>(.*)', entry)
         if match:
