@@ -5,11 +5,11 @@
 - OS
   - rhel 8.10
 - Container Engine
-  - podman 
+  - podman
 
 ## Environments
 
- Evns | Example | Remarks
+ Envs | Example | Remarks
 ---------|----------|---------
  HOST_IP | 192.168.10.240 | 웹서버 구동 호스트 IP
  HOST_PORT | 5678 | 외부 접근 PORT
@@ -41,3 +41,4 @@ podman load -i redis.tar
 cd ${docker-compose 파일 경로}
 podman compose up -d
 ```
+
