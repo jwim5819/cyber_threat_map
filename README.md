@@ -1,12 +1,5 @@
 # Live Cyber Threat Map
 
-## System Info
-
-- OS
-  - rhel 8.10
-- Container Engine
-  - podman
-
 ## Environments
 
  Envs | Example | Remarks
@@ -31,6 +24,9 @@ vi .env
 
 ```shell
 cd ${image 경로}
+```
+
+```shell
 podman load -i cyber_threat_map.tar
 podman load -i redis.tar
 ```
@@ -39,6 +35,21 @@ podman load -i redis.tar
 
 ```shell
 cd ${docker-compose 파일 경로}
+```
+
+```shell
 podman compose up -d
 ```
 
+## ETC
+
+- podman compose시 에러 날 경우
+
+```shell
+cd ${docker_install_files 폴더}
+```
+
+```shell
+cp docker-compose /usr/local/bin
+sudo chmod +x /usr/local/bin/docker-compose
+```

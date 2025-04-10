@@ -1,3 +1,4 @@
+# syslog_receiver.py 파일 수정
 import os
 import re
 import json
@@ -8,10 +9,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class SyslogMonitor:
-    def __init__(self, source_ip, source_port, print_log=False):
+    def __init__(self, source_ip, source_port, print_log=False, callback=None):
         self.source_ip = source_ip
         self.source_port = int(source_port)
         self.print_log = print_log
+        self.callback = callback  # 콜백 함수 추가
         
     def start_monitoring(self):
         filter_rule = f"udp port {self.source_port} and src host {self.source_ip}"
@@ -28,24 +30,34 @@ class SyslogMonitor:
             payload = raw_payload.decode('utf-8')
             log_entries = payload.strip().split('\n')
             
+            results = []
             for entry in log_entries:
-                self._process_log_entry(entry)
+                result = self._process_log_entry(entry)
+                if result:
+                    results.append(result)
+            return results
         
         except Exception as e:
-            if self.print_log:
-                print(e)
-            pass
+            print(e)
+            return None
 
     def _process_log_entry(self, entry):
         match = re.match(r'<(\d+)>(.*)', entry)
         if match:
             json_data = match.group(2)
             log_obj = json.loads(json_data)
-            self._handle_log_object(log_obj)
+            return self._handle_log_object(log_obj)
+        
         
     def _handle_log_object(self, log_obj):
         if self.print_log:
             print(log_obj)
+        
+        # 콜백 함수가 있으면 실행
+        if self.callback and callable(self.callback):
+            self.callback(log_obj)
+            
+        return log_obj
 
 
 if __name__ == "__main__":
