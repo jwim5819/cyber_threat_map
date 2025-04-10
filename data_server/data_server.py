@@ -2,12 +2,13 @@ import os
 import redis
 import maxminddb
 import json
-import pathlib
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
 from syslog_receiver import SyslogMonitor
 from const import META
-
+from utils.logger import mapserver_logger
 
 class AttackMapTracker:
     def __init__(self):
@@ -28,15 +29,15 @@ class AttackMapTracker:
     def connect_redis(self):
         try:
             if os.getenv("ENV") == "LOCAL":
-                print("[data_server - connect_redis] try to connect local redis")
+                mapserver_logger.info("try to connect local redis")
                 r = redis.StrictRedis(host="127.0.0.1", port=6379, db=0)
             else:
-                print("[data_server - connect_redis] try to connect redis")
+                mapserver_logger.info("try to connect redis")
                 r = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=6379, db=0)
-            print("[data_server - connect_redis] redis connected")
+            mapserver_logger.info("redis connected")
             return r
         except:
-            print("[data_server - connect_redis] redis failed")
+            mapserver_logger.error("redis failed")
             return None
 
     def parse_syslog(self, line):
@@ -74,21 +75,11 @@ class AttackMapTracker:
         self.super_dict["dst_ip"] = line.get("dst_ip")
         self.super_dict["dst_port"] = line.get("dst_port")
 
-        # 수정이 필요한 데이터
-        # self.super_dict["country_to_code"] = {}
-        # self.super_dict["dst_country_to_code"] = {}
-        # self.super_dict["msg_type"] = "Traffic"
-        # self.super_dict["msg_type2"] = "SNMP"
-        # self.super_dict["msg_type3"] = "CVE:190:741"
-        # self.super_dict["protocol"] = "HTTP"
-        # self.super_dict["type_attack"] = "SNMP"
-        # self.super_dict["cve_attack"] = "CVE:190:741"
-        # self.super_dict["event_count"] = 11480
-        # self.super_dict["continents_tracked"] = {}
-        # self.super_dict["countries_tracked"] = {}
-        # self.super_dict["ips_tracked"] = {}
-        # self.super_dict["unknowns"] = {}
-        # self.super_dict["ip_to_code"] = {}
+        # 컬러 실사용으로 바꿔야함
+        import random
+        colors = ["#B81FFF", "#FF1D25", "#FFB72D"]
+        selected_color = random.choice(colors)
+        self.super_dict["color"] = selected_color
         
         # 국가 테이블 데이터 갱신
         self.track_country_stats(country=src_ip_clean.get("country"),iso_code=src_ip_clean.get("iso_code"))
@@ -111,8 +102,8 @@ class AttackMapTracker:
             reader.close
             return response
         except FileNotFoundError:
-            print("[data_server - parse_geoip] DB not found")
-            print("[data_server - parse_geoip] SHUTTING DOWN")
+            mapserver_logger.error("DB not found")
+            mapserver_logger.error("SHUTTING DOWN")
             exit()
         except ValueError:
             return False
@@ -162,12 +153,13 @@ class AttackMapTracker:
 
     def check_permissions(self):
         if os.getuid() != 0:
-            print("[data_server - check_permissions] Please run this script as root")
-            print("[data_server - check_permissions] SHUTTING DOWN")
+            mapserver_logger.info("Please run this script as root")
+            mapserver_logger.info("SHUTTING DOWN")
             return False
         return True
 
     def run(self):
+        mapserver_logger.info("RUN data_server")
         if not self.check_permissions():
             exit()
 

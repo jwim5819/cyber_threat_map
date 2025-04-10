@@ -9,10 +9,15 @@ services:
     volumes:
       - ./:/src
     ports:
-      - "8081:8888"
+      - "8081:8888/tcp"
+      - "8081:8888/udp"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     restart: always
     depends_on:
       - redis-server
+    
 
   redis-server:
     image: redis:7.4
