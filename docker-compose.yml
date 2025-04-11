@@ -9,8 +9,8 @@ services:
     volumes:
       - ./:/src
     ports:
-      - "8081:8888/tcp"
-      - "8081:8888/udp"
+      - "9090:9999/tcp"
+      - "9090:9999/udp"
     cap_add:
       - NET_ADMIN
       - NET_RAW
