@@ -52,11 +52,10 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         if len(msg) == 0 or msg.body == 1:
             return None
         w_msg = ast.literal_eval(msg.body)
-        mapserver_logger.info(w_msg)
         try:
             self.write_message(w_msg)
         except Exception as e:
-            mapserver_logger.error(e)
+            mapserver_logger.error(f"mo {e}")
             return None
         
         
@@ -77,11 +76,14 @@ def main():
         mapserver_logger.info("Waiting on browser connections...")
         tornado.autoreload.start()
         tornado.autoreload.watch('static/map.js')
+        tornado.autoreload.watch('static/map.js')
         tornado.autoreload.watch('static/index.css')
         tornado.autoreload.watch('index.html')
+        tornado.autoreload.watch('../data_server/data_server.py')
+        tornado.autoreload.watch('../data_server/syslog_receiver.py')
         tornado.ioloop.IOLoop.instance().start()
     except Exception as e:
-        mapserver_logger.error(e)
+        mapserver_logger.error(f"mm {e}")
         
 if __name__ == "__main__":
     try:

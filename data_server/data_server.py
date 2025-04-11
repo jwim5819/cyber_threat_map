@@ -3,6 +3,9 @@ import redis
 import maxminddb
 import json
 import sys
+import threading
+import time
+import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -100,9 +103,23 @@ class AttackMapTracker:
         # 공격 유형 테이블 데이터 갱신
         self.track_attack_type(attack_type=self.super_dict["attack_type"])
 
-        print(self.super_dict)
         # redis로 데이터 전송
         self.redis_instance.publish("attack-map-production", self.super_dict)
+
+    def load_stats(self):
+        if os.path.exists(self.country_stats_path):
+            with open(self.country_stats_path, "r", encoding="utf-8") as f:
+                country_data = json.load(f)
+            for entry in country_data:
+                # 총 Attack 수 갱신
+                if entry["count"] is not None:
+                    self.event_count += entry["count"]
+            # 국가 카운팅 갱신
+            self.stats_list = country_data
+        if os.path.exists(self.attack_stats_path):
+            with open(self.attack_stats_path, "r", encoding="utf-8") as f:
+                attack_data = json.load(f)
+            self.attack_list = attack_data
 
     def find_geodata(self, ip):
         db_unclean = self.parse_geoip(ip)
@@ -189,10 +206,6 @@ class AttackMapTracker:
             json.dump(self.attack_list, f, ensure_ascii=False, indent="\t")
         return
 
-    def load_stats(self):
-        
-        return
-
     def check_permissions(self):
         if os.getuid() != 0:
             mapserver_logger.info("Please run this script as root")
@@ -200,7 +213,49 @@ class AttackMapTracker:
             return False
         return True
 
+    def reset_stats(self):
+        """통계 데이터 초기화"""
+        self.event_count = 0
+        self.stats_list = []
+        self.attack_list = []
+
+        # 초기화된 빈 데이터 파일 저장
+        with open(self.country_stats_path, "w", encoding="utf-8") as f:
+            json.dump(self.stats_list, f, ensure_ascii=False, indent="\t")
+        with open(self.attack_stats_path, "w", encoding="utf-8") as f:
+            json.dump(self.attack_list, f, ensure_ascii=False, indent="\t")
+
+        mapserver_logger.info(
+            "Stats reset at %s", datetime.datetime.now().strftime("%Y-%m-%d %H:00:00")
+        )
+
+    def schedule_stats_reset(self):
+        """정각마다 통계 초기화 스케줄링"""
+        now = datetime.datetime.now()
+        # 다음 정각 시간 계산
+        next_hour = now.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(
+            hours=1
+        )
+        # 다음 정각까지 대기할 시간(초)
+        wait_seconds = (next_hour - now).total_seconds()
+
+        # 타이머 설정
+        timer = threading.Timer(wait_seconds, self._reset_and_reschedule)
+        timer.daemon = True  # 메인 스레드 종료 시 함께 종료되도록 설정
+        timer.start()
+        mapserver_logger.info(
+            "Stats reset scheduled for %s", next_hour.strftime("%Y-%m-%d %H:00:00")
+        )
+
+    def _reset_and_reschedule(self):
+        """통계 초기화 후 다음 작업 예약"""
+        self.reset_stats()
+        self.schedule_stats_reset()  # 다음 정각을 위한 재스케줄링
+
     def run(self):
+        self.load_stats()
+        self.schedule_stats_reset()
+
         mapserver_logger.info("RUN data_server")
         if not self.check_permissions():
             exit()

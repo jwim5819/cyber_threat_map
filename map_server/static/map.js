@@ -1,9 +1,6 @@
 // 웹소켓 연결
 var webSock = new WebSocket(`ws://${ENV.HOST}:${ENV.PORT}/websocket`);
 
-// 어택 카운트
-let attackCounter = 0;
-
 // 공격 로그 데이터를 저장할 배열들
 let countryAttackStats = {};
 let attackTypeStats = {};
@@ -543,10 +540,9 @@ webSock.onmessage = function (e) {
     handleTraffic(msg, srcPoint, hqPoint, countryMarker);
 
     // 어택카운트 갱신
-    attackCounter++;
     document.querySelector(
       ".subtitle"
-    ).textContent = `${attackCounter.toLocaleString()} ATTACKS ON THIS DAY`;
+    ).textContent = `${msg.event_count.toLocaleString()} ATTACKS ON THIS DAY`;
   } catch (err) {
     console.log(err);
   }

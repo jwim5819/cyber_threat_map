@@ -65,7 +65,7 @@ if __name__ == "__main__":
     source_port = os.getenv("SYSLOG_SOURCE_PORT")
     
     if source_ip and source_port:
-        monitor = SyslogMonitor(source_ip, source_port, print_log=True)
+        monitor = SyslogMonitor(source_ip, source_port, print_log=False)
         monitor.start_monitoring()
     else:
         print("변수설정 누락")
