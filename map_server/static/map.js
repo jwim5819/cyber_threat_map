@@ -338,7 +338,7 @@ function addCountryName(msg, srcLatLng) {
   var countryIcon = L.divIcon({
     className: "country-label",
     html:
-      '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 24px;">' +
+      '<div style="color: white; text-shadow: 0.1px 0.1px 2px #000; text-align: center; width: 150px; font-size: 16px;">' +
       msg.country +
       "</div>",
     iconSize: [100, 20],

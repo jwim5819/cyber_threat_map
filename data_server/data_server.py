@@ -3,12 +3,14 @@ import redis
 import maxminddb
 import json
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
 from syslog_receiver import SyslogMonitor
-from const import META
+from const import META, PORTMAP
 from utils.logger import mapserver_logger
+
 
 class AttackMapTracker:
     def __init__(self):
@@ -17,14 +19,15 @@ class AttackMapTracker:
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         self.db_path = os.path.join(script_dir, "../DB/GeoLite2-City.mmdb")
-        self.stats_path = os.path.join(script_dir, "../DB/stats.txt")
+        self.country_stats_path = os.path.join(script_dir, "../DB/country_stats.json")
+        self.attack_stats_path = os.path.join(script_dir, "../DB/attack_stats.json")
         self.event_count = 0
         self.redis_instance = self.connect_redis()
         self.super_dict = {}
         self.flags_dict = {}
         self.stats_list = []
+        self.attack_list = []
         self.a = 0
-        
 
     def connect_redis(self):
         try:
@@ -44,6 +47,9 @@ class AttackMapTracker:
         """
         syslog 처리하는 callback 함수
         """
+        # 총 카운트
+        self.event_count += 1
+
         src_ip_clean = self.find_geodata(ip=line["src_ip"])
         dst_ip_clean = self.find_geodata(ip=line["dst_ip"])
 
@@ -51,10 +57,9 @@ class AttackMapTracker:
         if src_ip_clean is None or dst_ip_clean is None:
             return
 
-        self.event_count += 1
-
         # general
         self.super_dict["event_time"] = line.get("time")
+        self.super_dict["event_count"] = self.event_count
 
         # source IP
         self.super_dict["longitude"] = src_ip_clean.get("longitude")
@@ -77,13 +82,25 @@ class AttackMapTracker:
 
         # 컬러 실사용으로 바꿔야함
         import random
+
         colors = ["#B81FFF", "#FF1D25", "#FFB72D"]
         selected_color = random.choice(colors)
         self.super_dict["color"] = selected_color
-        
+
+        # 공격종류 실사용으로 바꿔야함
+        attack_type_list = list(PORTMAP.values())
+        attack_type = random.choice(attack_type_list)
+        self.super_dict["attack_type"] = attack_type
+
         # 국가 테이블 데이터 갱신
-        self.track_country_stats(country=src_ip_clean.get("country"),iso_code=src_ip_clean.get("iso_code"))
-        
+        self.track_country_stats(
+            country=src_ip_clean.get("country"), iso_code=src_ip_clean.get("iso_code")
+        )
+
+        # 공격 유형 테이블 데이터 갱신
+        self.track_attack_type(attack_type=self.super_dict["attack_type"])
+
+        print(self.super_dict)
         # redis로 데이터 전송
         self.redis_instance.publish("attack-map-production", self.super_dict)
 
@@ -130,9 +147,10 @@ class AttackMapTracker:
         return super_dict
 
     def track_country_stats(self, country, iso_code):
-        if not os.path.exists(self.stats_path):
-            open(self.stats_path, 'w').close()
+        if not os.path.exists(self.country_stats_path):
+            open(self.country_stats_path, "w").close()
         country_found = False
+
         for entry in self.stats_list:
             # 기존 국가 통계 갱신
             if entry["iso_code"] == iso_code:
@@ -147,8 +165,32 @@ class AttackMapTracker:
         # 정렬
         self.stats_list.sort(key=lambda x: x["count"], reverse=True)
         # 파일에 데이터 저장
-        with open(self.stats_path, "w", encoding="utf-8") as f:
+        with open(self.country_stats_path, "w", encoding="utf-8") as f:
             json.dump(self.stats_list, f, ensure_ascii=False, indent="\t")
+        return
+
+    def track_attack_type(self, attack_type):
+        if not os.path.exists(self.attack_stats_path):
+            open(self.attack_stats_path, "w").close()
+        attack_found = False
+        for entry in self.attack_list:
+            # 기존 공격유형형 통계 갱신
+            if entry["attack_type"] == attack_type:
+                entry["count"] += 1
+                attack_found = True
+                break
+        # 새로운 공격유형일일 경우 추가
+        if not attack_found:
+            self.attack_list.append({"attack_type": attack_type, "count": 1})
+        # 정렬
+        self.attack_list.sort(key=lambda x: x["count"], reverse=True)
+        # 파일에 데이터 저장
+        with open(self.attack_stats_path, "w", encoding="utf-8") as f:
+            json.dump(self.attack_list, f, ensure_ascii=False, indent="\t")
+        return
+
+    def load_stats(self):
+        
         return
 
     def check_permissions(self):
