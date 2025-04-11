@@ -121,11 +121,11 @@ map.on("moveend", update);
 function calcMidpoint(x1, y1, x2, y2, bend) {
   // 모든 입력값이 숫자인지 확인
   if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
-    console.warn("calcMidpoint received NaN values:", {x1, y1, x2, y2});
+    console.warn("calcMidpoint received NaN values:", { x1, y1, x2, y2 });
     // 기본값 반환 - 두 점 사이의 직선 중간점
     return { x: (x1 + x2) / 2 || 0, y: (y1 + y2) / 2 || 0 };
   }
-  
+
   // 입력값 순서 정렬 로직
   if (y2 < y1 && x2 < x1) {
     var tmpy = y2;
@@ -142,12 +142,12 @@ function calcMidpoint(x1, y1, x2, y2, bend) {
   // 0으로 나누기 방지
   var dx = x2 - x1;
   var dy = y2 - y1;
-  
+
   // 두 점이 같은 위치인 경우(기울기 계산 불가)
   if (Math.abs(dx) < 0.0001) {
     dx = 0.0001; // 작은 값으로 설정하여 계산 오류 방지
   }
-  
+
   var radian = Math.atan(-(dy / dx));
   var r = Math.sqrt(Math.abs(dx)) + Math.sqrt(Math.abs(dy));
   var m1 = (x1 + x2) / 2;
@@ -168,10 +168,14 @@ function calcMidpoint(x1, y1, x2, y2, bend) {
 
   // 결과 숫자 유효성 확인
   if (isNaN(a) || isNaN(b)) {
-    console.warn("calcMidpoint produced NaN values:", {a, b, inputs: {x1, y1, x2, y2}});
+    console.warn("calcMidpoint produced NaN values:", {
+      a,
+      b,
+      inputs: { x1, y1, x2, y2 },
+    });
     return { x: m1 || 0, y: m2 || 0 }; // 중간점 반환
   }
-  
+
   return { x: a, y: b };
 }
 
@@ -203,19 +207,19 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
   var fromY = srcPoint["y"];
   var toX = hqPoint["x"];
   var toY = hqPoint["y"];
-  
+
   // 좌표 유효성 검사
   if (isNaN(fromX) || isNaN(fromY) || isNaN(toX) || isNaN(toY)) {
     console.warn("Invalid coordinates detected:", { fromX, fromY, toX, toY });
     return; // 유효하지 않은 좌표면 애니메이션 실행하지 않음
   }
-  
+
   var bendArray = [true, false];
   var bend = bendArray[Math.floor(Math.random() * bendArray.length)];
 
   // 중간점 계산
   var midPoint = calcMidpoint(fromX, fromY, toX, toY, bend);
-  
+
   // 데이터 유효성 검사
   if (isNaN(midPoint.x) || isNaN(midPoint.y)) {
     console.warn("Invalid midpoint calculated:", midPoint);
@@ -223,12 +227,8 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
     midPoint = { x: (fromX + toX) / 2, y: (fromY + toY) / 2 };
   }
 
-  var lineData = [
-    srcPoint,
-    midPoint,
-    hqPoint,
-  ];
-  
+  var lineData = [srcPoint, midPoint, hqPoint];
+
   // 모든 좌표가 유효한지 최종 확인
   for (var i = 0; i < lineData.length; i++) {
     if (isNaN(lineData[i].x) || isNaN(lineData[i].y)) {
@@ -236,7 +236,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
       return; // 유효하지 않은 데이터가 있으면 중단
     }
   }
-  
+
   var lineFunction = d3.svg
     .line()
     .interpolate("basis")
@@ -255,7 +255,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
       .attr("stroke", msg.color)
       .attr("stroke-width", 1.5)
       .attr("fill", "none");
-    
+
     // 선 애니메이션
     var length = lineGraph.node().getTotalLength();
     lineGraph
@@ -495,6 +495,32 @@ function initializeApp() {
   createFixedCircleEffect("svg3", "#FFB72D");
 }
 
+// 애니메이션 일시 중지 함수
+function pauseAnimations() {
+  animationPaused = true;
+  console.log("Animation paused due to page visibility change");
+}
+
+// 애니메이션 재개 함수
+function resumeAnimations() {
+  // 기존 애니메이션 요소 정리
+  clearExistingAnimations();
+
+  // 애니메이션 재개
+  animationPaused = false;
+  console.log("Animation resumed");
+}
+
+// 기존 애니메이션 요소 정리 함수
+function clearExistingAnimations() {
+  // SVG 애니메이션 요소 제거 (원, 선 등)
+  svg.selectAll("circle").interrupt().remove();
+  svg.selectAll("path").interrupt().remove();
+
+  // 마커와 원도 제거 (필요에 따라 주석 처리 가능)
+  country_name.clearLayers();
+  circles.clearLayers();
+}
 // 웹소켓 메시지 처리 - 새 데이터 형식으로 업데이트
 webSock.onmessage = function (e) {
   try {
@@ -525,7 +551,6 @@ webSock.onmessage = function (e) {
     console.log(err);
   }
 };
-
 
 // DOM이 로드되면 앱 초기화
 window.addEventListener("load", initializeApp);
