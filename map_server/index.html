@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Cyber Threat Map</title>
+
+    <!-- 스크립트 -->
+    <script src="static/libs/js/d3.v3.min.js"></script>
+    <script src="static/libs/js/mapbox.js"></script>
+    <script src="static/libs/js/proj4.js"></script>
+    <script src="static/libs/js/proj4leaflet.min.js"></script>
+
+    <!-- 폰트 추가 - Pretendard 
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="static/libs/css/pretendard.css"
+    />
+    -->
+
+    <!-- CSS -->
+    <link href="static/libs/css/mapbox.css" rel="stylesheet" />
+    <link rel="stylesheet" href="static/libs/css/index.css" />
+    <style>
+      .hide-attack-type-table {
+        display: none !important;
+      }
+      .hide-attack-count {
+        display: none !important;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- 제목 컨테이너 (고정 위치) -->
+      <div class="title-container">
+        <h1 class="title">Threat Defense Missile Map</h1>
+        <p class="subtitle hide-attack-count" ></p>
+      </div>
+      
+      <div class="clock-container">
+        <div class="clock-content">
+          <span id="clock">clock</span>
+          <span id="apm">ampm</span>
+        </div>
+      </div>
+
+      <div class="logo-container">
+        <img src="static/images/logo/KB_logo.png" />
+      </div>
+
+      <!-- 메인 콘텐츠 래퍼 -->
+      <div class="content-wrapper">
+        <!-- 메인 지도 컨테이너 (전체 영역 차지) -->
+        <div class="map-container-wrapper" id="map-container-wrapper">
+          <!-- -->
+          <div class="map-container" id="map-container">
+            <div id="map"></div>
+          </div>
+
+          <!-- 사이드바 (지도 위에 오버레이) -->
+          <div class="sidebar">
+            <!-- 공격 국가 TOP5 테이블 -->
+            <div class="sidebar-table-container">
+              <h3 class="sidebar-table-title">공격 국가 TOP5</h3>
+              <div class="table-wrapper">
+                <table class="sidebar-table">
+                  <thead>
+                    <tr>
+                      <th>국가</th>
+                      <th>공격추이</th>
+                      <th>건수</th>
+                    </tr>
+                  </thead>
+                  <tbody id="country-attack-log">
+                    <!-- 데이터는 JS에서 동적으로 추가될 예정 -->
+                  </tbody>
+                </table>
+              </div> 
+            </div>
+
+            <!-- 공격 유형 TOP5 테이블 -->
+            <div class="sidebar-table-container">
+              <h3 class="sidebar-table-title">공격 유형 TOP3</h3>
+              <div class="table-wrapper">
+                <table class="sidebar-table">
+                  <thead>
+                    <tr>
+                      <th>유형</th>
+                      <th>공격추이</th>
+                      <th>건수</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attack-type-log"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="attack-type-container" id="attack-type-container">
+            <div class="attack-type">
+              <svg id="svg1"></svg>
+              <div class="attack-type-label">FW</div>
+            </div>
+            <div class="attack-type">
+              <svg id="svg2"></svg>
+              <div class="attack-type-label">IPS</div>
+            </div>
+            <div class="attack-type">
+              <svg id="svg3"></svg>
+              <div class="attack-type-label">DDoS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- map.js로 환경변수 전달 -->
+    <script>
+      const ENV = {
+        HOST: "{{HOST}}",
+        PORT: "{{PORT}}",
+      };
+    </script>
+    <script src="/static/map.js"></script>
+  </body>
+</html>

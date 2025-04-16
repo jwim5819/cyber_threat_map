@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  web-server:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: localhost/cyber_threat_map:v1.0
+    volumes:
+      - ./:/src
+    ports:
+      - 9090:9999
+    restart: always
+    depends_on:
+      - redis-server
+
+  redis-server:
+    image: localhost/redis:7.4
+    restart: always

@@ -1,0 +1,6 @@
+maxminddb==1.5.4
+redis==2.10.5
+tornado==4.4.2
+tornado-redis==2.4.18
+python-dotenv==0.21.1
+scapy==2.6.1
