@@ -56,7 +56,7 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         try:
             self.write_message(w_msg)
         except Exception as e:
-            mapserver_logger.error(f"mo {e}")
+            mapserver_logger.error(f"WebSocket message writing error: {e}")
             return None
         
         
@@ -83,16 +83,25 @@ def main():
         app = tornado.web.Application(handlers=handlers)
         app.listen(os.getenv("CONTAINER_PORT"))
         mapserver_logger.info("Waiting on browser connections...")
+        
+        # 자동 리로드 설정
         tornado.autoreload.start()
-        tornado.autoreload.watch('static/map.js')
-        tornado.autoreload.watch('static/map.js')
-        tornado.autoreload.watch('static/index.css')
-        tornado.autoreload.watch('index.html')
-        tornado.autoreload.watch('../data_server/data_server.py')
-        tornado.autoreload.watch('../data_server/syslog_receiver.py')
+        # 감시할 파일들
+        files_to_watch = [
+            'static/map.js',
+            'static/index.css',
+            'index.html',
+            '../data_server/data_server.py',
+            '../data_server/syslog_receiver.py'
+        ]
+        
+        # 모든 파일을 감시 목록에 추가
+        for file in files_to_watch:
+            tornado.autoreload.watch(file)
+            
         tornado.ioloop.IOLoop.instance().start()
     except Exception as e:
-        mapserver_logger.error(f"mm {e}")
+        mapserver_logger.error(f"Map server error: {e}")
         
 if __name__ == "__main__":
     try:

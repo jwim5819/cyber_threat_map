@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from syslog_receiver import SyslogMonitor
 from const import META, COLORS
 from utils.logger import mapserver_logger
-from country_coordinates import get_country_coordinates  # 국가 좌표 모듈 추가
+from country_coordinates import get_country_coordinates
 
 
 class AttackMapTracker:
@@ -32,15 +32,14 @@ class AttackMapTracker:
         self.flags_dict = {}
         self.stats_list = []
         self.attack_list = []
-        self.a = 0
-        
-        # 로그 발행 제한 관련 변수
-        self.publish_limit_per_minute = 70  # 분당 최대 70개 로그만 발행
+
+        # 너무 복잡해지는 것 방지 최대 1분에 70개만 화면에 뿌리기 위함
+        self.publish_limit_per_minute = 70
         self.last_minute_reset = time.time()
         
         # 발행 간격 제어 (밀리초)
-        self.min_publish_interval = (60 * 1000) / self.publish_limit_per_minute  # 밀리초 단위
-        self.last_publish_time = time.time() * 1000  # 밀리초 단위
+        self.min_publish_interval = (60 * 1000) / self.publish_limit_per_minute
+        self.last_publish_time = time.time() * 1000
         
         # 장비별 카운터 초기화
         self.device_counters = {
@@ -107,6 +106,7 @@ class AttackMapTracker:
         # 총 카운트
         self.event_count += 1
 
+        # GeoIP 정보 조회
         src_ip_clean = self.find_geodata(ip=line["src_ip"])
         dst_ip_clean = self.find_geodata(ip=line["dst_ip"])
 
@@ -114,43 +114,46 @@ class AttackMapTracker:
         if src_ip_clean is None or dst_ip_clean is None:
             return
 
-        # 장비 타입 확인
+        # 장비 타입 확인 및 이벤트 생성
+        device_type = self._get_device_type(line)
+        event_data = self._create_event_data(line, src_ip_clean, dst_ip_clean, device_type)
+        
+        # 통계 업데이트
+        self._update_statistics(event_data)
+        
+        # 이벤트 큐에 추가
+        self._queue_event(event_data, device_type)
+
+    def _get_device_type(self, line):
+        """
+        로그 라인에서 장비 타입 추출
+        """
         device_type = line.get("separator", "fw")  # 기본값은 fw
         if device_type not in self.device_types:
             device_type = "fw"  # 유효하지 않은 타입은 fw로 처리
-
-        # 이벤트 데이터 준비
+        return device_type
+    
+    def _create_event_data(self, line, src_ip_clean, dst_ip_clean, device_type):
+        """
+        이벤트 데이터 생성
+        """
         event_data = {}
         
         # general
         event_data["event_time"] = line.get("time")
         event_data["event_count"] = self.event_count
         
-        if device_type == "ips":
-            event_data["color"] = COLORS.get("ips")
-        elif device_type == "fw":
-            event_data["color"] = COLORS.get("fw")
-        elif device_type == "ddos":
-            event_data["color"] = COLORS.get("ddos")
+        # 장비 타입에 따른 색상 설정
+        event_data["color"] = COLORS.get(device_type)
 
         # 국가 이름 가져오기
         src_country = src_ip_clean.get("country")
         dst_country = dst_ip_clean.get("country")
         
-        # 국가 중심 좌표 가져오기 (국가 이름이 없는 경우 원래 IP의 위경도 사용)
-        src_coords = get_country_coordinates(src_country)
-        dst_coords = get_country_coordinates(dst_country)
+        # 소스 IP 좌표 설정
+        self._set_source_coordinates(event_data, src_ip_clean, src_country)
         
-        # source IP
-        if src_coords:
-            # 국가 중심 좌표 사용
-            event_data["latitude"] = src_coords[0]
-            event_data["longitude"] = src_coords[1]
-        else:
-            # 기존 IP 좌표 사용 (fallback)
-            event_data["latitude"] = src_ip_clean.get("latitude")
-            event_data["longitude"] = src_ip_clean.get("longitude")
-        
+        # 소스 IP 관련 정보 설정
         event_data["country"] = src_country
         event_data["continent"] = src_ip_clean.get("continent")
         event_data["continent_code"] = src_ip_clean.get("continent_code")
@@ -159,7 +162,35 @@ class AttackMapTracker:
         event_data["src_ip"] = line.get("src_ip")
         event_data["src_port"] = line.get("src_port")
 
-        # destination IP
+        # 목적지 IP 좌표 설정
+        self._set_destination_coordinates(event_data, dst_ip_clean, dst_country)
+        
+        # 목적지 IP 관련 정보 설정
+        event_data["dst_country"] = dst_country
+        event_data["dst_iso_code"] = dst_ip_clean.get("iso_code")
+        event_data["dst_ip"] = line.get("dst_ip")
+        event_data["dst_port"] = line.get("dst_port")
+
+        # 공격종류
+        event_data["attack_type"] = line.get("attack_type")
+        
+        return event_data
+    
+    def _set_source_coordinates(self, event_data, src_ip_clean, src_country):
+        """소스 IP 좌표 설정"""
+        src_coords = get_country_coordinates(src_country)
+        if src_coords:
+            # 국가 중심 좌표 사용
+            event_data["latitude"] = src_coords[0]
+            event_data["longitude"] = src_coords[1]
+        else:
+            # 기존 IP 좌표 사용 (fallback)
+            event_data["latitude"] = src_ip_clean.get("latitude")
+            event_data["longitude"] = src_ip_clean.get("longitude")
+    
+    def _set_destination_coordinates(self, event_data, dst_ip_clean, dst_country):
+        """목적지 IP 좌표 설정"""
+        dst_coords = get_country_coordinates(dst_country)
         if dst_coords:
             # 국가 중심 좌표 사용
             event_data["dst_lat"] = dst_coords[0]
@@ -168,25 +199,21 @@ class AttackMapTracker:
             # 기존 IP 좌표 사용 (fallback)
             event_data["dst_lat"] = dst_ip_clean.get("latitude")
             event_data["dst_long"] = dst_ip_clean.get("longitude")
-        
-        event_data["dst_country"] = dst_country
-        event_data["dst_iso_code"] = dst_ip_clean.get("iso_code")
-        event_data["dst_ip"] = line.get("dst_ip")
-        event_data["dst_port"] = line.get("dst_port")
-
-        # 공격종류
-        event_data["attack_type"] = line.get("attack_type")
-
+    
+    def _update_statistics(self, event_data):
+        """통계 데이터 업데이트"""
         # 국가 테이블 데이터 갱신 (모든 로그 기준으로 통계 유지)
         self.track_country_stats(
-            country=src_country, iso_code=src_ip_clean.get("iso_code")
+            country=event_data.get("country"), 
+            iso_code=event_data.get("iso_code")
         )
 
         # 공격 유형 테이블 데이터 갱신 (모든 로그 기준으로 통계 유지)
-        self.track_attack_type(attack_type=event_data["attack_type"])
+        self.track_attack_type(attack_type=event_data.get("attack_type"))
         mapserver_logger.info(event_data)
-        
-        # 이벤트 큐에 추가
+    
+    def _queue_event(self, event_data, device_type):
+        """이벤트를 큐에 추가"""
         with self.publish_lock:
             self.device_queues[device_type].append(event_data)
 
