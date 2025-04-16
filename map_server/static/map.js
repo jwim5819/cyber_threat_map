@@ -287,7 +287,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
       .attr("stroke-dasharray", length + " " + length)
       .attr("stroke-dashoffset", length)
       .transition()
-      .duration(1000)
+      .duration(800)
       .ease("ease-in")
       .attr("stroke-dashoffset", 0)
       .each("end", function () {
