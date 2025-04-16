@@ -34,7 +34,7 @@ class AttackMapTracker:
         self.attack_list = []
 
         # 너무 복잡해지는 것 방지 최대 1분에 70개만 화면에 뿌리기 위함
-        self.publish_limit_per_minute = 70
+        self.publish_limit_per_minute = 200
         self.last_minute_reset = time.time()
         
         # 발행 간격 제어 (밀리초)

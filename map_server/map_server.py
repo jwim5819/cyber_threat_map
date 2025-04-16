@@ -56,7 +56,8 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         try:
             self.write_message(w_msg)
         except Exception as e:
-            mapserver_logger.error(f"WebSocket message writing error: {e}")
+            # mapserver_logger.error(f"WebSocket message writing error: {e}")
+            pass
             return None
         
         

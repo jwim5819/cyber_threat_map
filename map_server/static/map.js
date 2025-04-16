@@ -287,7 +287,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
       .attr("stroke-dasharray", length + " " + length)
       .attr("stroke-dashoffset", length)
       .transition()
-      .duration(1700)
+      .duration(1000)
       .ease("ease-in")
       .attr("stroke-dashoffset", 0)
       .each("end", function () {
@@ -312,7 +312,7 @@ function handleTraffic(msg, srcPoint, hqPoint, countryMarker) {
         // A->B 방향으로 선이 사라지는 애니메이션
         d3.select(this)
           .transition()
-          .duration(1700)
+          .duration(1000)
           .attr("stroke-dashoffset", -length) // 음수값을 주면 반대 방향으로 대시 이동
           .style("opacity", 0.7)
           .remove();
@@ -530,7 +530,6 @@ function initializeApp() {
 // 애니메이션 일시 중지 함수
 function pauseAnimations() {
   animationPaused = true;
-  console.log("Animation paused due to page visibility change");
 }
 
 // 애니메이션 재개 함수
@@ -540,7 +539,6 @@ function resumeAnimations() {
 
   // 애니메이션 재개
   animationPaused = false;
-  console.log("Animation resumed");
 }
 
 // 기존 애니메이션 요소 정리 함수
