@@ -53,7 +53,6 @@ class WebSocketChatHandler(tornado.websocket.WebSocketHandler):
         if len(msg) == 0 or msg.body == 1:
             return None
         w_msg = ast.literal_eval(msg.body)
-        mapserver_logger.info(f"{w_msg}")
         try:
             self.write_message(w_msg)
         except Exception as e:

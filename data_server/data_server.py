@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from syslog_receiver import SyslogMonitor
 from const import META, COLORS
 from utils.logger import mapserver_logger
+from country_coordinates import get_country_coordinates  # 국가 좌표 모듈 추가
 
 
 class AttackMapTracker:
@@ -132,10 +133,25 @@ class AttackMapTracker:
         elif device_type == "ddos":
             event_data["color"] = COLORS.get("ddos")
 
+        # 국가 이름 가져오기
+        src_country = src_ip_clean.get("country")
+        dst_country = dst_ip_clean.get("country")
+        
+        # 국가 중심 좌표 가져오기 (국가 이름이 없는 경우 원래 IP의 위경도 사용)
+        src_coords = get_country_coordinates(src_country)
+        dst_coords = get_country_coordinates(dst_country)
+        
         # source IP
-        event_data["longitude"] = src_ip_clean.get("longitude")
-        event_data["latitude"] = src_ip_clean.get("latitude")
-        event_data["country"] = src_ip_clean.get("country")
+        if src_coords:
+            # 국가 중심 좌표 사용
+            event_data["latitude"] = src_coords[0]
+            event_data["longitude"] = src_coords[1]
+        else:
+            # 기존 IP 좌표 사용 (fallback)
+            event_data["latitude"] = src_ip_clean.get("latitude")
+            event_data["longitude"] = src_ip_clean.get("longitude")
+        
+        event_data["country"] = src_country
         event_data["continent"] = src_ip_clean.get("continent")
         event_data["continent_code"] = src_ip_clean.get("continent_code")
         event_data["iso_code"] = src_ip_clean.get("iso_code")
@@ -144,9 +160,16 @@ class AttackMapTracker:
         event_data["src_port"] = line.get("src_port")
 
         # destination IP
-        event_data["dst_long"] = dst_ip_clean.get("longitude")
-        event_data["dst_lat"] = dst_ip_clean.get("latitude")
-        event_data["dst_country"] = dst_ip_clean.get("country")
+        if dst_coords:
+            # 국가 중심 좌표 사용
+            event_data["dst_lat"] = dst_coords[0]
+            event_data["dst_long"] = dst_coords[1]
+        else:
+            # 기존 IP 좌표 사용 (fallback)
+            event_data["dst_lat"] = dst_ip_clean.get("latitude")
+            event_data["dst_long"] = dst_ip_clean.get("longitude")
+        
+        event_data["dst_country"] = dst_country
         event_data["dst_iso_code"] = dst_ip_clean.get("iso_code")
         event_data["dst_ip"] = line.get("dst_ip")
         event_data["dst_port"] = line.get("dst_port")
@@ -156,11 +179,12 @@ class AttackMapTracker:
 
         # 국가 테이블 데이터 갱신 (모든 로그 기준으로 통계 유지)
         self.track_country_stats(
-            country=src_ip_clean.get("country"), iso_code=src_ip_clean.get("iso_code")
+            country=src_country, iso_code=src_ip_clean.get("iso_code")
         )
 
         # 공격 유형 테이블 데이터 갱신 (모든 로그 기준으로 통계 유지)
         self.track_attack_type(attack_type=event_data["attack_type"])
+        mapserver_logger.info(event_data)
         
         # 이벤트 큐에 추가
         with self.publish_lock:
