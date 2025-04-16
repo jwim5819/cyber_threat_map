@@ -70,3 +70,9 @@ PORTMAP = {
     5903:"RDP",      # VNC:3
     8080:"HTTP",     # HTTP Alternative
 }
+
+COLORS = {
+        "fw": "#FF1D25",
+        "ips": "#B81FFF",
+        "ddos": "#FFB72D"
+}

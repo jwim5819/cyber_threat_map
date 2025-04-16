@@ -1,5 +1,9 @@
 # In the Name of God, the Originator the Creative
 
+*.json
+__pycache__/
+*.pyc
+
 ############################
 # OS X
 ############################
@@ -73,21 +77,13 @@ $RECYCLE.BIN/
 *.sql
 *.sqlite
 *.sqlite3
-*.mmdb
 
 ############################
 # Misc.
 ############################
-
-/myenv
-.env
-*#
-ssl
-.idea
-nbproject
-metatrader
-config.yaml
 *.pyc
+.idea
+/myenv
 
 ############################
 # Node.js

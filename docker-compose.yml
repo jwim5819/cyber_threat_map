@@ -1,19 +1,19 @@
-version: '3'
+version: "3"
 
 services:
   web-server:
     build:
       context: .
       dockerfile: dockerfile
-    image: cyber_threat_map:v1.0
+    image: localhost/cyber_threat_map:v1.0
     volumes:
       - ./:/src
     ports:
-      - "8080:8888"
+      - 9090:9999
     restart: always
     depends_on:
       - redis-server
 
   redis-server:
-    image: redis:7.4
+    image: localhost/redis:7.4
     restart: always
