@@ -171,8 +171,8 @@ function calcMidpoint(x1, y1, x2, y2, bend) {
   var m1 = (x1 + x2) / 2;
   var m2 = (y1 + y2) / 2;
 
-  var min = 2.5,
-    max = 4.5;
+  var min = 0.5,
+    max = 2;
   var arcIntensity = parseFloat((Math.random() * (max - min) + min).toFixed(2));
 
   var a, b;
